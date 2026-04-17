@@ -1,7 +1,7 @@
 
 # EMR settings
 
-- EMR release: 7.8.0
+- EMR release: 7.13.0
 - Application bundle: Core Hadoop
   
 - Primary instance: type: `m4.large`, quantity: 1
