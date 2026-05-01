@@ -177,7 +177,7 @@ Note: `sort` is a Linux command that sorts lines of text. Here, it emulates Hado
 
 ## Step 3: Submitting the job
 
-![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) IMPORTANT: Copy and paste the following code line by line, including `\` at the end.
+![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) IMPORTANT: Copy and paste the following code **line by line, including `\` at the end**.
 
 ```shell
 mapred streaming -D mapreduce.job.reduces=2 \
