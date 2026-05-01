@@ -180,8 +180,7 @@ Note: `sort` is a Linux command that sorts lines of text. Here, it emulates Hado
 ![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) IMPORTANT: Copy and paste the following code line by line, including `\` at the end.
 
 ```shell
-mapred streaming -D mapreduce.input.fileinputformat.split.minsize=134217728 \
--D mapreduce.job.reduces=2 \
+mapred streaming -D mapreduce.job.reduces=2 \
 -files mapper.py,reducer.py \
 -input /<Your ITSC Account>/data -output /<Your ITSC Account>/program_output_1 \
 -mapper "python mapper.py" -reducer "python reducer.py"
@@ -209,12 +208,11 @@ tail -n20 combinedresult.txt
 
 # Using Combiners
 
-![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) IMPORTANT: Copy and paste the following code line by line, including `\` at the end.
+![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) IMPORTANT: Copy and paste the following code **line by line, including `\` at the end**.
 
 
 ```shell
-mapred streaming -D mapreduce.input.fileinputformat.split.minsize=134217728 \
--D mapreduce.job.reduces=2 \
+mapred streaming -D mapreduce.job.reduces=2 \
 -files mapper.py,reducer.py \
 -input /<Your ITSC Account>/data -output /<Your ITSC Account>/program_output_2 \
 -mapper "python mapper.py" -reducer "python reducer.py" -combiner "python reducer.py"
