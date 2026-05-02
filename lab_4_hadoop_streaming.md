@@ -229,7 +229,7 @@ Hadoop Streaming allows the use of custom partitioners, but it requires the part
 Note: You can skip step 1 by downloading a pre-compiled JAR.
 
 ```shell
-wget https://github.com/justinjiajia/bigdata_lab_2025/raw/refs/heads/main/resources/partitioner.jar
+https://github.com/justinjiajia/bigdata_lab_2026/raw/refs/heads/main/partitioner.jar
 ```
 
 ##  Step 1: Coding and compiling the custom Java Partitioner 
