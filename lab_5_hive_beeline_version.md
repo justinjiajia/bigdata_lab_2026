@@ -70,6 +70,23 @@
 
 type `q` to exit the display of the status 
 
+
+The Hive Metastore and HiveServer2 run as different processes. Here is the breakdown of how they differ and why they are separate:
+
+1. The Metastore (The Librarian/Dictionary)
+What it does: The Metastore holds all the metadata (the schema, the column names, the data types, and the HDFS directory locations). It does not hold the actual data, and it does not run SQL queries.
+
+What it actually is: It consists of two parts:
+
+A background relational database (like MySQL, PostgreSQL, or a local Derby instance) that actually stores the schema text.
+
+The Metastore Service (a Java daemon) that acts as the API, allowing other programs to read that database safely.
+
+EMR Service Name: `hive-hcatalog-server`
+
+Who uses it: HiveServer2 uses it, but so do other engines! Apache Spark, Presto, and Trino all connect to the Hive Metastore to find out where tables are located.
+
+
 # Data preparation
 
 ```shell
