@@ -47,6 +47,40 @@
 
 
 
+# Services
+
+
+```shell
+[hadoop@ip-172-31-82-126 ~]$ systemctl --type=service | grep hive
+  hive-hcatalog-server.service                          loaded active running HCatalog server
+  hive-server2.service                                  loaded active running Hive Server2
+
+[hadoop@ip-xxxx ~]$ systemctl status hive-server2
+● hive-server2.service - Hive Server2
+     Loaded: loaded (/etc/systemd/system/hive-server2.service; enabled; preset: disabled)
+     Active: active (running) since Wed 2026-05-27 07:29:24 UTC; 14min ago
+   Main PID: 12604 (bash)
+      Tasks: 43 (limit: 9497)
+     Memory: 463.4M
+        CPU: 27.355s
+     CGroup: /system.slice/hive-server2.service
+             ├─12604 /bin/bash -c "/usr/lib/hive/bin/hive --service hiveserver2 > /var/log/hive/hive-server2.out 2>&1"
+             └─12605 /usr/lib/jvm/jre-17/bin/java -Dproc_jar -Dhive.log.dir=/var/log/hive -Dhive.log.file=hive-server2.log -Dhive.log.threshol>
+[hadoop@ip-172-31-82-126 ~]$ systemctl status hive-server2
+● hive-server2.service - Hive Server2
+     Loaded: loaded (/etc/systemd/system/hive-server2.service; enabled; preset: disabled)
+     Active: active (running) since Wed 2026-05-27 07:29:24 UTC; 14min ago
+   Main PID: 12604 (bash)
+      Tasks: 43 (limit: 9497)
+     Memory: 463.5M
+        CPU: 27.378s
+     CGroup: /system.slice/hive-server2.service
+             ├─12604 /bin/bash -c "/usr/lib/hive/bin/hive --service hiveserver2 > /var/log/hive/hive-server2.out 2>&1"
+             └─12605 /usr/lib/jvm/jre-17/bin/java -Dproc_jar -Dhive.log.dir=/var/log/hive -Dhive.log.file=hive-server2.log -Dhive.log.threshol>
+```
+
+type `q` to exit the display of the status 
+
 # Data preparation
 
 ```shell
