@@ -480,7 +480,44 @@ INFO  : Concurrency mode is disabled, not creating a lock manager
 10 rows selected (17.62 seconds)
 ```
 
+### Diagnosis: Why so many NULL entries:
 
+```sql
+SELECT id, name, neighbourhood, neighbourhood_cleansed FROM listings LIMIT 10;
+```
+
+
+```
+INFO  : Compiling command(queryId=hive_20260528160619_924eb9eb-e200-4b91-a89b-31a4278b3105): SELECT id, name, neighbourhood, neighbourhood_cleansed
+FROM listings
+LIMIT 10
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:id, type:string, comment:null), FieldSchema(name:name, type:string, comment:null), FieldSchema(name:neighbourhood, type:string, comment:null), FieldSchema(name:neighbourhood_cleansed, type:string, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20260528160619_924eb9eb-e200-4b91-a89b-31a4278b3105); Time taken: 0.12 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hive_20260528160619_924eb9eb-e200-4b91-a89b-31a4278b3105): SELECT id, name, neighbourhood, neighbourhood_cleansed
+FROM listings
+LIMIT 10
+INFO  : Completed executing command(queryId=hive_20260528160619_924eb9eb-e200-4b91-a89b-31a4278b3105); Time taken: 0.003 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++----------------------------------------------------+------------------------------------------------+----------------+-------------------------+
+|                         id                         |                      name                      | neighbourhood  | neighbourhood_cleansed  |
++----------------------------------------------------+------------------------------------------------+----------------+-------------------------+
+| 103760                                             | Central Centre 5 min walk to/from Central MTR  |                | Central & Western       |
+| 248140                                             | Bright Studio - Soho - Central HK              | NULL           | NULL                    |
+| NULL                                               | NULL                                           | NULL           | NULL                    |
+| my Wife and I have this little apartment for friends and family which we let to travelers to Hong Kong when its free.   | NULL                                           | NULL           | NULL                    |
+| NULL                                               | NULL                                           | NULL           | NULL                    |
+| We like to look after people and ensure that they enjoy their stay in Hong Kong.  We have someone who will visit every other day to keep the place clean and tidy.   | NULL                                           | NULL           | NULL                    |
+| NULL                                               | NULL                                           | NULL           | NULL                    |
+| We can arrange travel cards                        | NULL                                           | NULL           | NULL                    |
+| NULL                                               | NULL                                           | NULL           | NULL                    |
+| We will be available on the phone during your stay to help with whatever you need and make sure that you enjoy your stay.  If you need an unlocked phone for your stay we are happy to lend you one. | NULL                                           | NULL           | NULL                    |
++----------------------------------------------------+------------------------------------------------+----------------+-------------------------+
+10 rows selected (0.163 seconds)
+```
 
  
 
