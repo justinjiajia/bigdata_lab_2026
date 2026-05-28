@@ -44,7 +44,7 @@ The output should display
 ```
 This indicates that these two Hive-related services are currently healthy and running in the background.
 
-You can also try `systemctl status hive-server2` (later, to exit the display mode, type `q`).
+Note: You can also check the detailed status by running `systemctl status hive-server2`. To exit the display mode and return to your terminal prompt, simply type `q`.
 
 #### Understanding the Architecture:
  
@@ -56,7 +56,7 @@ You can also try `systemctl status hive-server2` (later, to exit the display mod
 
 #### Exploring the Metastore Database (MariaDB)
 
-On Amazon EMR, the RDBMS that Hive uses for storing its metadata is MariaDB (an open-source fork of MySQL). The actual Hive Metastore DB files are located in `/var/lib/mysql/hive` on the Master node.
+On Amazon EMR, the relational database that Hive uses for storing its metadata is MariaDB (an open-source fork of MySQL). The actual Hive Metastore DB files are located in `/var/lib/mysql/hive` on the Master node.
 
 To explore this, we will log directly into the MariaDB database. 
 
@@ -73,9 +73,8 @@ Next, log into the MariaDB shell:
 ```shell
 $ mysql -u hive -p
 ```
-
-Paste the password when prompted.
-
+ 
+Paste the password when prompted. 
 Once you are inside the MariaDB shell, you can explore the metadata tables that Hive uses behind the scenes:
 
 ```SQL
@@ -84,12 +83,11 @@ MariaDB [hive]> SHOW TABLES;
 ```
 
  
-
-
 # Data preparation
 
-Data source:
-https://insideairbnb.com/get-the-data/
+Next, we'll get some real-world data to analyze.  
+
+Data source (provided by Inside Airbnb): https://insideairbnb.com/get-the-data/ 
 
  <img width="800"   src="https://github.com/user-attachments/assets/d8d303d1-51ff-4c77-abd6-03b0dab6956c" />
 
@@ -99,6 +97,8 @@ nano script.sh
 ```
 
 Copy and paste the code snippet below into the *script.sh* file. 
+
+This script creates a data folder, downloads the listings and reviews datasets for New York City, and peeks at the first few lines.
 
 
 ```shell
@@ -127,8 +127,7 @@ echo -e "\nShow the downloaded files"
 ls -lh data
 ```
 
-
-Save the change and get back to the shell. Then run:
+Save the change and exit the editor. Then run the script:
 
 ```shell
 bash script.sh
@@ -146,7 +145,10 @@ sh script.sh
 
 # Use SQL-like Queries with Hive
 
-<br>
+
+We will use Beeline, which is a JDBC client that connects to our HiveServer2 daemon, to query downloaded data. 
+
+
 
 ## Step 1: Open the Beeline CLI  
 
@@ -162,9 +164,8 @@ Note:
 - `jdbc:hive2://`:	The protocol. It tells Beeline to use the standard JDBC driver specifically designed for HiveServer2.
 - `localhost`:	This tells Beeline that the Hive server is running on the same machine where you are typing the command. (In a production environment, this would be the IP address or domain name of a remote master node, like *10.0.5.24*).
 - `:10000`: The port number. Port 10000 is the universal default port that HiveServer2 listens on for incoming traffic.
-- `-hiveconf` lets us set configuration properties at startup.
-- Here, we're telling Hive where to store temporary files when it chooses to run MapReduce jobs locally.
-
+- `-n hadoop`: Specifies that we are connecting as the hadoop user.
+- (Optional) `-hiveconf`: Lets us set Hive configuration properties at startup.
  
 
 
@@ -175,7 +176,11 @@ Note:
 ## Step 2: Creating External Tables
 
 
-Create the listings table:
+Before we can analyze our CSV files, we need to define their schemas in Hive.
+
+### Create the listings table
+
+Because Airbnb listing names often contain commas (e.g., "Cozy Apartment, Great View"), we use the OpenCSVSerde to parse the file correctly and ignore commas wrapped in quotes
 
 ```sql
 CREATE EXTERNAL TABLE listings (
@@ -190,7 +195,9 @@ TBLPROPERTIES ("skip.header.line.count"="1");
 ```
 
 
-Create the reviews table:
+### Create the reviews table
+
+This file is simple, so we can use a standard delimiter format.
 
 ```sql
 CREATE EXTERNAL TABLE reviews (`listing_id` STRING, `date` STRING)
@@ -199,56 +206,61 @@ LOCATION '/bigdata/airbnb/reviews'
 TBLPROPERTIES ("skip.header.line.count"="1");
 ```
 
+Notice that we pointed the tables to specific LOCATIONs in HDFS. 
+
+Hive automatically creates these directories for us. 
+
+Let's verify this using an HDFS shell command directly from Beeline:
 
 ```shell
 !sh hadoop fs -ls /bigdata/airbnb
 ```
 
-You should see:
+You should see that the directories corresponding to the two tables have been created:
 
 ```shell
 Found 2 items
 drwxr-xr-x   - hadoop hdfsadmingroup          0 2026-05-28 15:04 /bigdata/airbnb/listings
 drwxr-xr-x   - hadoop hdfsadmingroup          0 2026-05-28 14:56 /bigdata/airbnb/reviews
 ```
-
-This indicates that the directories that corresponds to the two tables have benn created automatically.
-
+ 
+Confirm the metadata about the 2 tables have been inserted into the Metastore:
 
 ```sql
 SHOW TABLES;
 ```
-
-Note:
-
-- If you **don't** use the `EXTERNAL` keyword, Hive creates the table in **internal mode**, meaning:
-
-  - Hive manages the data entirely.
-  - Dropping the table will delete the underlying data stored in HDFS, e.g., `/user/hive/warehouse/books`.
-
-   
-
   
 
-  <br>
+## Step 3: Loading Data into the Tables
 
-## Step 3
+Now that the schemas and HDFS directories are ready, 
+we need to push our downloaded CSV files from the local Linux filesystem into HDFS so Hive can process them.
 
 ```sql
 LOAD DATA LOCAL INPATH '/home/hadoop/data/listings.csv' OVERWRITE INTO TABLE listings;
 LOAD DATA LOCAL INPATH '/home/hadoop/data/reviews.csv' OVERWRITE INTO TABLE reviews;
 ```
 
-You can verify that the data files have been sucessfully loaded  as follows:
+You can verify that the data files have been successfully loaded into the distributed file system:
   
 ```shell
 !sh hadoop fs -ls /bigdata/airbnb/listings
 Found 1 items
--rw-r--r--   1 hadoop hdfsadmingroup   12877434 2026-05-28 15:14 /bigdata/airbnb/listings/listings.csv
+-rw-r--r--   1 hadoop hdfsadmingroup    6425805 2026-05-28 16:53 /bigdata/airbnb/listings/listings.csv
+```
+
+```shell
+!sh hadoop fs -ls /bigdata/airbnb/reviews;
+Found 1 items
+-rw-r--r--   1 hadoop hdfsadmingroup   22516069 2026-05-28 16:53 /bigdata/airbnb/reviews/reviews.csv
 ```
 
 
-## Step 3: Exploring Schema and Data
+## Step 4: Exploring Schema and Data
+
+Before running heavy analytical queries, a best practice is to inspect the schema and preview the data.
+
+Show a brief schema of the reviews table:
 
 
 
@@ -258,13 +270,13 @@ Show a brief schema:
 DESCRIBE reviews;
 ```
 
-Show a detailed schema (including storage info):
+Show a detailed schema:
 
 ```sql
 DESCRIBE FORMATTED reviews;
 ```
 
-Display the first 5 records to have a preview:
+Preview the first 5 records to ensure the columns aligned correctly:
 
 ```sql
 SELECT * FROM reviews LIMIT 5;
@@ -273,14 +285,16 @@ SELECT * FROM listings LIMIT 5;
 
 
 
-## Step 4: Exploring analytical queries
+## Step 5: Exploring Analytical Queries
 
 
-### Question 1
+Now comes the fun part! Let's run queries to answer to answer several analytics questions.
 
-#### What is the total market share of each room type?
- 
 
+###  Question 1: What is the total market share of each room type?
+
+This query helps us understand how the Airbnb market is divided between entire homes, private rooms, and shared rooms.
+  
 ```sql
 SELECT room_type, COUNT(id) AS total_listings
 FROM listings WHERE room_type IS NOT NULL AND room_type != ''
@@ -293,7 +307,7 @@ The meanings of the involved fields:
 - `room_type`: Represents the category of the Airbnb listing (e.g., "Entire home/apt", "Private room", or "Shared room"). 
 - `id`: The unique identifer assigned to every individual property listing on Airbnb.
 
- 
+(When you run this, you will see the execution logs showing Map and Reduce stages progressing, followed by the final output table). 
 
 The output should look like the following:
 
@@ -339,9 +353,10 @@ INFO  : Concurrency mode is disabled, not creating a lock manager
 +------------------+-----------------+
 ```
 
-#### Question 2
+###  Question 2: Who are the top 10 busiest "Mega-Hosts" in the city?
 
-##### Who are the top 10 busiest "Mega-Hosts" in the city (hosts who manage multiple properties), and how many reviews do their properties have combined? 
+Let's identify hosts who manage multiple properties and see how much guest feedback their properties have combined.
+
 
 ```sql
 SELECT host_name, host_id, COUNT(id) AS total_properties_managed, SUM(number_of_reviews) AS total_host_reviews
@@ -356,7 +371,7 @@ The meanings of the involved fields:
 
 - `host_name`: The first name or profile name of the person managing the Airbnb listing.
 - `host_id`: The unique identifier for the host.
-- `number_of_reviews`: The total number of reviews a single property has received over its lifetime.
+- `number_of_reviews`: The total number of reviews a single property has received over its lifetime. We `SUM()` this to get the host's grand total.
 
 The output should look like the following:
 
@@ -414,12 +429,12 @@ INFO  : Concurrency mode is disabled, not creating a lock manager
 ```
 
 
-#### Question 3
+#### Question 3: Which 10 neighborhoods received the highest volume of tourist traffic specifically in the year 2023?
 
-##### Which 10 neighborhoods received the highest volume of tourist traffic (based on reviews) specifically in the year 2023?
+The listings table only shows the all-time total number of reviews. 
 
-
-The listings table only shows the all-time total number of reviews.  To find out what happened in a specific year, we must join the reviews table. 
+To find out what happened in a specific year, we must join the listings table with the reviews table.
+ 
 
 ```sql
 SELECT l.neighbourhood, COUNT(r.listing_id) AS reviews_in_2023
@@ -430,8 +445,7 @@ ORDER BY reviews_in_2023 DESC
 LIMIT 10;
 ```
 
-The word `date` is a reserved keyword in Hive (it is an actual data type, like `INT` or `STRING`).
-Wrap the word date in backticks to tell Hive that we are specifically referring to a column name and not the reserved keyword, 
+Note: The word `date` is a reserved keyword in Hive (it is an actual data type, like `INT` or `STRING`). Wrap the word date in backticks to tell Hive that we are specifically referring to a column name and not the reserved keyword.
 
 
 The output should look like the following:
@@ -496,12 +510,15 @@ INFO  : Concurrency mode is disabled, not creating a lock manager
 10 rows selected (17.747 seconds)
 ```
 
-
-## Step 7 Saving Output to HDFS or Local Filesystem
-
+## Step 6: Saving Output to HDFS or Local Filesystem
 
 
-### Option 1: Save to a Custom HDFS Directory
+We will often need to save the results of our analytical queries for reporting or visualization.
+
+
+### Option 1: Save to a Custom HDFS Directory (Recommended)
+
+This method securely writes the output back into the distributed file system.
 
 ```sql
 INSERT OVERWRITE DIRECTORY "/bigdata/airbnb/output" ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
@@ -512,37 +529,42 @@ GROUP BY l.neighbourhood
 ORDER BY reviews_in_2023 DESC;
 ```
 
-You can confirm the output is saved using:
+You can confirm the output files were generated using:
 
 ```shell
 !sh hadoop fs -ls /bigdata/airbnb/output
 ```
 
-
-
-------
-
-
+ 
 
 ### Option 2: Save Output to a Local Filesystem Directory
+ 
+If you want to extract the data directly to the local master node, you can use `LOCAL DIRECTORY`.
 
-
-Create the folder before running the query and grant everyone write permissions (`777`).
+First, create the folder and grant everyone write permissions (`777`).
+ 
 
 ```shell
 !sh mkdir -p /home/hadoop/output
 !sh chmod 777 /home/hadoop/output
 ```
 
-Why is this necessary:
+#### Why is this necessary?
 
-> The Client (Beeline): We logged in as the `hadoop` user.
-> The Coordinator (HiveServer2): This daemon is permanently running in the background as the `hive` user.
-> The Processing (Tez/YARN): Because you have `hive.server2.enable.doAs=true` configured (verify by running `SET hive.server2.enable.doAs;`), HiveServer2 tells YARN, "Hey, run this Tez job impersonating the hadoop user." The actual heavy lifting (reading the CSVs, joining them, writing to the temporary HDFS folder /tmp/hive/hadoop/...) is done securely on behalf of `hadoop`.
-> The Failure Point (The MoveTask): Once the Tez job finishes in HDFS, control returns to the coordinator (HiveServer2). To execute the INSERT OVERWRITE LOCAL DIRECTORY command, HiveServer2 attempts to copy the data from HDFS down to the local Linux filesystem.
-> Crucially, this local filesystem copy is often executed directly by the HiveServer2 JVM process, which is running as the `hive` user.
-> The hive user attempts to create or write into /home/hadoop/output. Linux, seeing that the hive user is trying to write into the hadoop user's private home directory, blocks it with a "Permission Denied" error, causing the MoveTask to crash.
+The Client (Beeline): We logged in as the hadoop user.
 
+The Coordinator (HiveServer2): This daemon permanently runs in the background as the hive user.
+
+The Processing (Tez/YARN): Because `hive.server2.enable.doAs=true` is configured by default, HiveServer2 tells YARN, "Run this Tez job impersonating the hadoop user." The actual heavy lifting (reading the CSVs, joining them, writing to the temporary HDFS folder /tmp/hive/hadoop/...) is done securely on behalf of `hadoop`.
+
+The Failure Point (The MoveTask): Once the job finishes, HiveServer2 attempts to copy the data from HDFS down to the local Linux filesystem. Crucially, this local copy is executed by the HiveServer2 JVM process, which is running as the `hive` user.
+
+The hive user attempts to write into `/home/hadoop/output`. Linux blocks it with a "Permission Denied" error because hive does not have access to hadoop's private directory. Setting permissions to 777 bypasses this crash!
+
+
+---
+ 
+Now, run the query:
 
 ```sql
 INSERT OVERWRITE LOCAL DIRECTORY "/home/hadoop/output" ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
@@ -553,7 +575,7 @@ GROUP BY l.neighbourhood
 ORDER BY reviews_in_2023 DESC;
 ```
 
-You can confirm the output is saved using:
+You can confirm the output is saved on your local machine using:
 
 ```shell
 !sh ls /tmp/output
@@ -561,7 +583,9 @@ You can confirm the output is saved using:
 
 
 
-## Step 8: Exit Beeline
+## Step 7: Exit Beeline
+
+When you are finished with your session, exit Beeline by simply typing:
 
 ```shell
 !quit
@@ -573,14 +597,18 @@ You can confirm the output is saved using:
 
 **Apache Tez** is a high-performance, DAG-based execution engine that is often used as a drop-in replacement for MapReduce in Hive.
 
-Tez supports a **rich set of operators** — including filters, joins, unions, group-bys, and sorts — and can pass intermediate results **in-memory** between stages. As a result, it can run complex Hive queries **much faster** than MapReduce.
+Tez supports a rich set of operators — including filters, joins, unions, group-bys, and sorts — and can pass intermediate results in-memory between stages. 
 
-But if you want to fall back to MapReduce
+By skipping the heavy disk-writing bottlenecks of MapReduce, it can run complex Hive queries much faster.
+ 
+ 
+If you are experimenting and want to force Hive to fall back to legacy MapReduce, you can pass the engine configuration when launching Beeline:
 
 ```shell
 beeline -u jdbc:hive2://localhost:10000 -n hadoop -hiveconf hive.execution.engine=mr
 ```
-Disable local mode so the job always goes to YARN:
+
+To ensure that your jobs are submitted to the YARN cluster (rather than executing in a single local JVM process for small datasets), disable the local auto mode in your Beeline session:
 
 ```shell
 set hive.exec.mode.local.auto=false;
