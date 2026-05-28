@@ -172,7 +172,7 @@ Note:
 
 <br>
 
-## Step 2: Creating a Table (External vs Internal)
+## Step 2: Creating External Tables
 
 
 Create the listings table:
