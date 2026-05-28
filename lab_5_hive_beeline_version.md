@@ -101,18 +101,17 @@ Copy and paste the code snippet below into the *script.sh* file.
 mkdir data
 cd data
 
-echo -e "Downloading listings.csv\n"
-
-https://data.insideairbnb.com/united-states/ny/new-york-city/2026-02-13/visualisations/listings.csv.gz
+echo -e "Downloading listings.csv"
+wget https://data.insideairbnb.com/united-states/ny/new-york-city/2026-02-13/visualisations/listings.csv
 head -n2 listings.csv
 
-echo -e "Downloading reviews.csv\n"
+echo -e "\nDownloading reviews.csv"
 
-https://data.insideairbnb.com/united-states/ny/new-york-city/2026-02-13/visualisations/reviews.csv.gz
+wget https://data.insideairbnb.com/united-states/ny/new-york-city/2026-02-13/visualisations/reviews.csv
 head -n2 reviews.csv
 cd ..
 
-echo -e "Display the downloaded files\n"
+echo -e "\nShow the downloaded files"
 
 ls -lh data
 ```
@@ -174,7 +173,9 @@ Create the listings table:
 
 ```sql
 CREATE EXTERNAL TABLE listings (
-    `id` STRING, `listing_url` STRING, `scrape_id` STRING, `last_scraped` STRING, `source` STRING, `name` STRING, `description` STRING, `neighborhood_overview` STRING, `picture_url` STRING, `host_id` STRING, `host_url` STRING, `host_name` STRING, `host_since` STRING, `host_location` STRING, `host_about` STRING, `host_response_time` STRING, `host_response_rate` STRING, `host_acceptance_rate` STRING, `host_is_superhost` STRING, `host_thumbnail_url` STRING, `host_picture_url` STRING, `host_neighbourhood` STRING, `host_listings_count` STRING, `host_total_listings_count` STRING, `host_verifications` STRING, `host_has_profile_pic` STRING, `host_identity_verified` STRING, `neighbourhood` STRING, `neighbourhood_cleansed` STRING, `neighbourhood_group_cleansed` STRING, `latitude` STRING, `longitude` STRING, `property_type` STRING, `room_type` STRING, `accommodates` STRING, `bathrooms` STRING, `bathrooms_text` STRING, `bedrooms` STRING, `beds` STRING, `amenities` STRING, `price` STRING, `minimum_nights` STRING, `maximum_nights` STRING, `minimum_minimum_nights` STRING, `maximum_minimum_nights` STRING, `minimum_maximum_nights` STRING, `maximum_maximum_nights` STRING, `minimum_nights_avg_ntm` STRING, `maximum_nights_avg_ntm` STRING, `calendar_updated` STRING, `has_availability` STRING, `availability_30` STRING, `availability_60` STRING, `availability_90` STRING, `availability_365` STRING, `calendar_last_scraped` STRING, `number_of_reviews` INT, `number_of_reviews_ltm` INT, `number_of_reviews_l30d` INT, `availability_eoy` STRING, `number_of_reviews_ly` STRING, `estimated_occupancy_l365d` STRING, `estimated_revenue_l365d` STRING, `first_review` STRING, `last_review` STRING, `review_scores_rating` DOUBLE, `review_scores_accuracy` STRING, `review_scores_cleanliness` STRING, `review_scores_checkin` STRING, `review_scores_communication` STRING, `review_scores_location` STRING, `review_scores_value` STRING, `license` STRING, `instant_bookable` STRING, `calculated_host_listings_count` STRING, `calculated_host_listings_count_entire_homes` STRING, `calculated_host_listings_count_private_rooms` STRING, `calculated_host_listings_count_shared_rooms` STRING, `reviews_per_month` STRING
+    `id` BIGINT, `name` STRING, `host_id` BIGINT, `host_profile_id` STRING, `host_name` STRING, `neighbourhood_group` STRING, `neighbourhood` STRING,
+    `latitude` STRING, `longitude` STRING, `room_type` STRING, `price` DOUBLE, `minimum_nights` INT, `number_of_reviews` INT, `last_review` STRING,
+    `reviews_per_month` DOUBLE, `calculated_host_listings_count` INT, `availability_365` INT, `number_of_reviews_ltm` INT, `license` STRING
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES ("separatorChar" = ",", "quoteChar" = "\"", "escapeChar" = "\\")
@@ -186,9 +187,8 @@ TBLPROPERTIES ("skip.header.line.count"="1");
 Create the reviews table:
 
 ```sql
-CREATE EXTERNAL TABLE reviews (`listing_id` STRING, `id` STRING, `date` STRING, `reviewer_id` STRING, `reviewer_name` STRING, `comments` STRING)
-ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
-WITH SERDEPROPERTIES ("separatorChar" = ",", "quoteChar" = "\"", "escapeChar" = "\\")
+CREATE EXTERNAL TABLE reviews (`listing_id` STRING, `date` STRING)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
 LOCATION '/bigdata/airbnb/reviews'
 TBLPROPERTIES ("skip.header.line.count"="1");
 ```
@@ -229,8 +229,8 @@ Note:
 ## Step 3
 
 ```sql
-LOAD DATA LOCAL INPATH '/home/hadoop/data/reviews.csv' OVERWRITE INTO TABLE reviews;
 LOAD DATA LOCAL INPATH '/home/hadoop/data/listings.csv' OVERWRITE INTO TABLE listings;
+LOAD DATA LOCAL INPATH '/home/hadoop/data/reviews.csv' OVERWRITE INTO TABLE reviews;
 ```
 
 You can verify that the data files have been sucessfully loaded  as follows:
@@ -270,154 +270,154 @@ SELECT * FROM listings LIMIT 5;
 ## Step 4: Exploring analytical queries
 
 
-### Question 1: "Which 10 neighborhoods have the highest concentration of top-tier Airbnb hosts?"
+### Question 1
 
-Specifically, we want to count the actual number of unique people who have earned *Superhost* status in each neighborhood, rank those neighborhoods from highest to lowest, and select the top 10 neighborhoods for display.
+#### What is the total market share of each room type?
+ 
 
 ```sql
-SELECT neighbourhood_cleansed, COUNT(DISTINCT host_id) AS number_of_superhosts
-FROM listings WHERE host_is_superhost = 't'
-GROUP BY neighbourhood_cleansed
-ORDER BY number_of_superhosts DESC
-LIMIT 10;
+SELECT room_type, COUNT(id) AS total_listings
+FROM listings WHERE room_type IS NOT NULL AND room_type != ''
+GROUP BY room_type
+ORDER BY total_listings DESC;
 ```
 
 
 The meanings of the involved fields:
 
-- `host_is_superhost`: A string flag indicating whether Airbnb has awarded the host "Superhost" status (a designation for highly rated, reliable hosts). We filter for 't' to ensure we are only looking at Superhosts.	't' (true)'f' (false)'' (empty/null)
-- `neighbourhood_cleansed`:	The standardized, official name of the district or neighborhood where the listing is located.
-- `host_id`: A unique ID assigned by Airbnb to every user who hosts a property.
+
  
 
 The output should look like the following:
 
 ```
-INFO  : Compiling command(queryId=hive_20260528153109_8606a3a3-ab81-434c-87fd-2eef0ec5c88d): SELECT neighbourhood_cleansed, COUNT(DISTINCT host_id) AS number_of_superhosts
-FROM listings WHERE host_is_superhost = 't'
-GROUP BY neighbourhood_cleansed
-ORDER BY number_of_superhosts DESC
-LIMIT 10
+INFO  : Compiling command(queryId=hive_20260528170018_18d96420-8218-4f57-a0a1-86fb8fd2ec57): SELECT  room_type, COUNT(id) AS total_listings
+FROM listings WHERE room_type IS NOT NULL AND room_type != ''
+GROUP BY room_type
+ORDER BY total_listings DESC
 INFO  : Concurrency mode is disabled, not creating a lock manager
 INFO  : Semantic Analysis Completed (retrial = false)
-INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:neighbourhood_cleansed, type:string, comment:null), FieldSchema(name:number_of_superhosts, type:bigint, comment:null)], properties:null)
-INFO  : Completed compiling command(queryId=hive_20260528153109_8606a3a3-ab81-434c-87fd-2eef0ec5c88d); Time taken: 1.749 seconds
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:room_type, type:string, comment:null), FieldSchema(name:total_listings, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20260528170018_18d96420-8218-4f57-a0a1-86fb8fd2ec57); Time taken: 0.242 seconds
 INFO  : Concurrency mode is disabled, not creating a lock manager
-INFO  : Executing command(queryId=hive_20260528153109_8606a3a3-ab81-434c-87fd-2eef0ec5c88d): SELECT neighbourhood_cleansed, COUNT(DISTINCT host_id) AS number_of_superhosts
-FROM listings WHERE host_is_superhost = 't'
-GROUP BY neighbourhood_cleansed
-ORDER BY number_of_superhosts DESC
-LIMIT 10
-INFO  : Query ID = hive_20260528153109_8606a3a3-ab81-434c-87fd-2eef0ec5c88d
+INFO  : Executing command(queryId=hive_20260528170018_18d96420-8218-4f57-a0a1-86fb8fd2ec57): SELECT  room_type, COUNT(id) AS total_listings
+FROM listings WHERE room_type IS NOT NULL AND room_type != ''
+GROUP BY room_type
+ORDER BY total_listings DESC
+INFO  : Query ID = hive_20260528170018_18d96420-8218-4f57-a0a1-86fb8fd2ec57
 INFO  : Total jobs = 1
 INFO  : Launching Job 1 out of 1
 INFO  : Starting task [Stage-1:MAPRED] in serial mode
-INFO  : Subscribed to counters: [] for queryId: hive_20260528153109_8606a3a3-ab81-434c-87fd-2eef0ec5c88d
-INFO  : Tez session hasn't been created yet. Opening session
-INFO  : Dag name: SELECT neighbourhood_cleansed, COUNT(DI...10 (Stage-1)
-INFO  : Status: Running (Executing on YARN cluster with App id application_1779976941000_0001)
+INFO  : Subscribed to counters: [] for queryId: hive_20260528170018_18d96420-8218-4f57-a0a1-86fb8fd2ec57
+INFO  : Session is already open
+INFO  : Dag name: SELECT  room_type, COUNT(id) AS total...DESC (Stage-1)
+INFO  : Status: Running (Executing on YARN cluster with App id application_1779976941000_0004)
+
+INFO  : Map 1: -/-      Reducer 2: 0/2  Reducer 3: 0/1
+INFO  : Map 1: 0/1      Reducer 2: 0/2  Reducer 3: 0/1
+INFO  : Map 1: 0(+1)/1  Reducer 2: 0/2  Reducer 3: 0/1
+INFO  : Map 1: 0(+1)/1  Reducer 2: 0/2  Reducer 3: 0/1
+INFO  : Map 1: 1/1      Reducer 2: 2/2  Reducer 3: 0(+1)/1
+INFO  : Map 1: 1/1      Reducer 2: 2/2  Reducer 3: 1/1
+INFO  : Completed executing command(queryId=hive_20260528170018_18d96420-8218-4f57-a0a1-86fb8fd2ec57); Time taken: 7.769 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++------------------+-----------------+
+|    room_type     | total_listings  |
++------------------+-----------------+
+| Entire home/apt  | 19343           |
+| Private room     | 16365           |
+| Hotel room       | 334             |
+| Shared room      | 249             |
++------------------+-----------------+
+```
+
+#### Question 2
+
+##### Who are the top 10 busiest "Mega-Hosts" in the city (hosts who manage multiple properties), and how many reviews do their properties have combined? 
+
+```sql
+SELECT host_name, host_id, COUNT(id) AS total_properties_managed, SUM(number_of_reviews) AS total_host_reviews
+FROM listings WHERE host_name IS NOT NULL
+GROUP BY host_name, host_id
+ORDER BY total_properties_managed DESC
+LIMIT 10;
+```
+
+The output should look like the following:
+
+```
+INFO  : Compiling command(queryId=hive_20260528170329_6195c5b8-fb25-4448-aecf-d75f060f6152): SELECT host_name, host_id, COUNT(id) AS total_properties_managed, SUM(number_of_reviews) AS total_host_reviews
+FROM listings WHERE host_name IS NOT NULL
+GROUP BY host_name, host_id
+ORDER BY total_properties_managed DESC
+LIMIT 10
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:host_name, type:string, comment:null), FieldSchema(name:host_id, type:string, comment:null), FieldSchema(name:total_properties_managed, type:bigint, comment:null), FieldSchema(name:total_host_reviews, type:double, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20260528170329_6195c5b8-fb25-4448-aecf-d75f060f6152); Time taken: 0.157 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hive_20260528170329_6195c5b8-fb25-4448-aecf-d75f060f6152): SELECT host_name, host_id, COUNT(id) AS total_properties_managed, SUM(number_of_reviews) AS total_host_reviews
+FROM listings WHERE host_name IS NOT NULL
+GROUP BY host_name, host_id
+ORDER BY total_properties_managed DESC
+LIMIT 10
+INFO  : Query ID = hive_20260528170329_6195c5b8-fb25-4448-aecf-d75f060f6152
+INFO  : Total jobs = 1
+INFO  : Launching Job 1 out of 1
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : Subscribed to counters: [] for queryId: hive_20260528170329_6195c5b8-fb25-4448-aecf-d75f060f6152
+INFO  : Session is already open
+INFO  : Dag name: SELECT host_name, host_id, COUNT(id) AS...10 (Stage-1)
+INFO  : Status: Running (Executing on YARN cluster with App id application_1779976941000_0004)
 
 INFO  : Map 1: -/-      Reducer 2: 0/2  Reducer 3: 0/1
 INFO  : Map 1: 0/1      Reducer 2: 0/2  Reducer 3: 0/1
 INFO  : Map 1: 0/1      Reducer 2: 0/2  Reducer 3: 0/1
 INFO  : Map 1: 0(+1)/1  Reducer 2: 0/2  Reducer 3: 0/1
 INFO  : Map 1: 0(+1)/1  Reducer 2: 0/2  Reducer 3: 0/1
-INFO  : Map 1: 1/1      Reducer 2: 0/2  Reducer 3: 0/1
+INFO  : Map 1: 1/1      Reducer 2: 0(+1)/2      Reducer 3: 0/1
 INFO  : Map 1: 1/1      Reducer 2: 2/2  Reducer 3: 0(+1)/1
 INFO  : Map 1: 1/1      Reducer 2: 2/2  Reducer 3: 1/1
-INFO  : Completed executing command(queryId=hive_20260528153109_8606a3a3-ab81-434c-87fd-2eef0ec5c88d); Time taken: 29.99 seconds
+INFO  : Completed executing command(queryId=hive_20260528170329_6195c5b8-fb25-4448-aecf-d75f060f6152); Time taken: 8.416 seconds
 INFO  : OK
 INFO  : Concurrency mode is disabled, not creating a lock manager
-+-------------------------+-----------------------+
-| neighbourhood_cleansed  | number_of_superhosts  |
-+-------------------------+-----------------------+
-| Central & Western       | 71                    |
-| Yau Tsim Mong           | 57                    |
-| Islands                 | 36                    |
-| Wan Chai                | 31                    |
-| Eastern                 | 14                    |
-| Sai Kung                | 7                     |
-| Sham Shui Po            | 4                     |
-| North                   | 4                     |
-| Kowloon City            | 4                     |
-| Kwun Tong               | 3                     |
-+-------------------------+-----------------------+
-10 rows selected (31.907 seconds)
++----------------------+------------+---------------------------+---------------------+
+|      host_name       |  host_id   | total_properties_managed  | total_host_reviews  |
++----------------------+------------+---------------------------+---------------------+
+| Blueground           | 107434423  | 1210                      | 211.0               |
+| Eugene               | 3223938    | 560                       | 132.0               |
+| Luxury Bookings Fze  | 446820235  | 330                       | 0.0                 |
+| Jeniffer             | 51501835   | 260                       | 1375.0              |
+| Hiroki               | 19303369   | 251                       | 494.0               |
+| Urban Furnished      | 162280872  | 246                       | 545.0               |
+| Shogo                | 200239515  | 225                       | 363.0               |
+| Momoyo               | 204704622  | 216                       | 328.0               |
+| Nat                  | 35491667   | 214                       | 832.0               |
+| Furnished Quarters   | 22541573   | 183                       | 149.0               |
++----------------------+------------+---------------------------+---------------------+
+10 rows selected (8.627 seconds)
 ```
 
-#### Question 2: "Does being a "Superhost" actually correlate with better ratings and more reviews? "
+
+#### Question 3
+
+##### Which 10 neighborhoods received the highest volume of tourist traffic (based on reviews) specifically in the year 2023?
+
+
+The listings table only shows the all-time total number of reviews.  To find out what happened in a specific year, we must join the reviews table. 
 
 ```sql
-SELECT  host_is_superhost, COUNT(id) AS total_listings, AVG(review_scores_rating) AS avg_rating, AVG(number_of_reviews) AS avg_reviews
-FROM listings WHERE host_is_superhost IN ('t', 'f')
-GROUP BY host_is_superhost;
-```
-
-The output should look like the following:
-```
-INFO  : Compiling command(queryId=hive_20260528154437_5b3fd264-3f9c-450e-aa16-4bdc13642b71): SELECT
-host_is_superhost,
-COUNT(id) AS total_listings,
-AVG(review_scores_rating) AS avg_rating,
-AVG(number_of_reviews) AS avg_reviews
-FROM listings
-WHERE host_is_superhost IN ('t', 'f')
-GROUP BY host_is_superhost
-INFO  : Concurrency mode is disabled, not creating a lock manager
-INFO  : Semantic Analysis Completed (retrial = false)
-INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:host_is_superhost, type:string, comment:null), FieldSchema(name:total_listings, type:bigint, comment:null), FieldSchema(name:avg_rating, type:double, comment:null), FieldSchema(name:avg_reviews, type:double, comment:null)], properties:null)
-INFO  : Completed compiling command(queryId=hive_20260528154437_5b3fd264-3f9c-450e-aa16-4bdc13642b71); Time taken: 0.304 seconds
-INFO  : Concurrency mode is disabled, not creating a lock manager
-INFO  : Executing command(queryId=hive_20260528154437_5b3fd264-3f9c-450e-aa16-4bdc13642b71): SELECT
-host_is_superhost,
-COUNT(id) AS total_listings,
-AVG(review_scores_rating) AS avg_rating,
-AVG(number_of_reviews) AS avg_reviews
-FROM listings
-WHERE host_is_superhost IN ('t', 'f')
-GROUP BY host_is_superhost
-INFO  : Query ID = hive_20260528154437_5b3fd264-3f9c-450e-aa16-4bdc13642b71
-INFO  : Total jobs = 1
-INFO  : Launching Job 1 out of 1
-INFO  : Starting task [Stage-1:MAPRED] in serial mode
-INFO  : Subscribed to counters: [] for queryId: hive_20260528154437_5b3fd264-3f9c-450e-aa16-4bdc13642b71
-INFO  : Tez session hasn't been created yet. Opening session
-INFO  : Dag name: SELECT
-host_is_superhost...host_is_superhost (Stage-1)
-INFO  : Status: Running (Executing on YARN cluster with App id application_1779976941000_0002)
-
-INFO  : Map 1: -/-      Reducer 2: 0/2
-INFO  : Map 1: 0/1      Reducer 2: 0/2
-INFO  : Map 1: 0/1      Reducer 2: 0/2
-INFO  : Map 1: 0(+1)/1  Reducer 2: 0/2
-INFO  : Map 1: 0(+1)/1  Reducer 2: 0/2
-INFO  : Map 1: 1/1      Reducer 2: 0(+1)/2
-INFO  : Map 1: 1/1      Reducer 2: 2/2
-INFO  : Completed executing command(queryId=hive_20260528154437_5b3fd264-3f9c-450e-aa16-4bdc13642b71); Time taken: 19.877 seconds
-INFO  : OK
-INFO  : Concurrency mode is disabled, not creating a lock manager
-+--------------------+-----------------+--------------------+---------------------+
-| host_is_superhost  | total_listings  |     avg_rating     |     avg_reviews     |
-+--------------------+-----------------+--------------------+---------------------+
-| t                  | 572             | 4.08372377622378   | 45.09440559440559   |
-| f                  | 3138            | 2.685755258126196  | 12.281708094327596  |
-+--------------------+-----------------+--------------------+---------------------+
-2 rows selected (20.256 seconds)
-```
-
-
-#### Question 3: "Which 10 neighborhoods have the highest overall guest engagement and visitor activity?"
-
-Since Airbnb does not explicitly tell us exactly how many people booked a stay in each area, we use reviews as a proxy for visitor foot traffic.
-
-```sql
-SELECT  l.neighbourhood_cleansed, COUNT(r.listing_id) as total_reviews 
-FROM listings l JOIN reviews r ON l.id = r.listing_id 
-GROUP BY l.neighbourhood_cleansed
-ORDER BY total_reviews DESC 
+SELECT l.neighbourhood, COUNT(r.listing_id) AS reviews_in_2023
+FROM listings l JOIN reviews r ON l.id = r.listing_id
+WHERE r.`date` LIKE '2023-%'
+GROUP BY l.neighbourhood
+ORDER BY reviews_in_2023 DESC
 LIMIT 10;
 ```
 
+The word `date` is a reserved keyword in Hive (it is an actual data type, like `INT` or `STRING`).
+Wrap the word date in backticks (`\``) to tell Hive that we are specifically referring to a column name and not the reserved keyword, 
 
 
 The output should look like the following:
