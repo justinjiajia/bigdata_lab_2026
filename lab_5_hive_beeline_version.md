@@ -88,6 +88,12 @@ MariaDB [hive]> SHOW TABLES;
 
 # Data preparation
 
+Data source:
+https://insideairbnb.com/get-the-data/
+
+ <img width="800"   src="https://github.com/user-attachments/assets/d8d303d1-51ff-4c77-abd6-03b0dab6956c" />
+
+
 ```shell
 nano script.sh
 ```
@@ -103,11 +109,16 @@ cd data
 
 echo -e "Downloading listings.csv"
 wget https://data.insideairbnb.com/united-states/ny/new-york-city/2026-02-13/visualisations/listings.csv
+
+echo -e "\nPeeking into listings.csv"
+
 head -n2 listings.csv
 
 echo -e "\nDownloading reviews.csv"
 
 wget https://data.insideairbnb.com/united-states/ny/new-york-city/2026-02-13/visualisations/reviews.csv
+
+echo -e "\nPeeking into reviews.csv"
 head -n2 reviews.csv
 cd ..
 
@@ -491,6 +502,94 @@ INFO  : Concurrency mode is disabled, not creating a lock manager
 ```
 
 
+## Step 7 Saving Output to HDFS or Local Filesystem
+
+
+
+### Option 1: Save to a Custom HDFS Directory
+
+```sql
+INSERT OVERWRITE DIRECTORY "/bigdata/airbnb/output" ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+SELECT l.neighbourhood, COUNT(r.listing_id) AS reviews_in_2023
+FROM listings l JOIN reviews r ON l.id = r.listing_id
+WHERE r.`date` LIKE '2023-%'
+GROUP BY l.neighbourhood
+ORDER BY reviews_in_2023 DESC;
+```
+
+You can confirm the output is saved using:
+
+```shell
+!sh hadoop fs -ls /bigdata/airbnb/output
+```
+
+
+
+------
+
+
+
+### Option 2: Save Output to a Local Filesystem Directory
+
+
+Create the folder before running the query and grant everyone write permissions (`777`).
+
+```shell
+!sh mkdir -p /home/hadoop/output
+!sh chmod 777 /home/hadoop/output
+```
+
+Why is this necessary:
+
+> The Client (Beeline): We logged in as the `hadoop` user.
+> The Coordinator (HiveServer2): This daemon is permanently running in the background as the `hive` user.
+> The Processing (Tez/YARN): Because you have `hive.server2.enable.doAs=true` configured (verify by running `SET hive.server2.enable.doAs;`), HiveServer2 tells YARN, "Hey, run this Tez job impersonating the hadoop user." The actual heavy lifting (reading the CSVs, joining them, writing to the temporary HDFS folder /tmp/hive/hadoop/...) is done securely on behalf of `hadoop`.
+> The Failure Point (The MoveTask): Once the Tez job finishes in HDFS, control returns to the coordinator (HiveServer2). To execute the INSERT OVERWRITE LOCAL DIRECTORY command, HiveServer2 attempts to copy the data from HDFS down to the local Linux filesystem.
+> Crucially, this local filesystem copy is often executed directly by the HiveServer2 JVM process, which is running as the `hive` user.
+> The hive user attempts to create or write into /home/hadoop/output. Linux, seeing that the hive user is trying to write into the hadoop user's private home directory, blocks it with a "Permission Denied" error, causing the MoveTask to crash.
+
+
+```sql
+INSERT OVERWRITE LOCAL DIRECTORY "/home/hadoop/output" ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+SELECT l.neighbourhood, COUNT(r.listing_id) AS reviews_in_2023
+FROM listings l JOIN reviews r ON l.id = r.listing_id
+WHERE r.`date` LIKE '2023-%'
+GROUP BY l.neighbourhood
+ORDER BY reviews_in_2023 DESC;
+```
+
+You can confirm the output is saved using:
+
+```shell
+!sh ls /tmp/output
+```
+
+
+
+## Step 8: Exit the Hive CLI
+
+```shell
+!quit
+```
+
+
+
+# Run Hive Queries on Tez (Optional)
+
+**Apache Tez** is a high-performance, DAG-based execution engine that is often used as a drop-in replacement for MapReduce in Hive.
+
+Tez supports a **rich set of operators** — including filters, joins, unions, group-bys, and sorts — and can pass intermediate results **in-memory** between stages. As a result, it can run complex Hive queries **much faster** than MapReduce.
+
+But if you want to fall back to MapReduce
+
+```shell
+beeline -u jdbc:hive2://localhost:10000 -n hadoop -hiveconf hive.execution.engine=mr
+```
+Disable local mode so the job always goes to YARN
+
+```shell
+set hive.exec.mode.local.auto=false;
+```
 
  
 
