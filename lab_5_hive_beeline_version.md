@@ -566,7 +566,7 @@ You can confirm the output is saved using:
 
 
 
-## Step 8: Exit the Hive CLI
+## Step 8: Exit Beeline
 
 ```shell
 !quit
@@ -585,7 +585,7 @@ But if you want to fall back to MapReduce
 ```shell
 beeline -u jdbc:hive2://localhost:10000 -n hadoop -hiveconf hive.execution.engine=mr
 ```
-Disable local mode so the job always goes to YARN
+Disable local mode so the job always goes to YARN:
 
 ```shell
 set hive.exec.mode.local.auto=false;
