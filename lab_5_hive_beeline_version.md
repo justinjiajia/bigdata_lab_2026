@@ -16,25 +16,6 @@
             "properties": {
                 "hadoop.http.staticuser.user": "hadoop"
             }
-        },
-        {
-            "classification": "hdfs-site",
-            "properties": {
-                "dfs.block.size": "16777216",
-                "dfs.replication": "3"
-            }
-        },
-        {
-            "classification": "mapred-site",
-            "properties": {
-                "mapreduce.job.reduces": "3"
-            }
-        },
-        {
-            "classification": "hive-site",
-            "properties": {
-                "hive.execution.engine": "mr"
-          }
         }
     ]
     ```
