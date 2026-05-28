@@ -165,12 +165,7 @@ Note:
 - `-hiveconf` lets us set configuration properties at startup.
 - Here, we're telling Hive where to store temporary files when it chooses to run MapReduce jobs locally.
 
-
-
-
-```shell
-beeline -u jdbc:hive2://localhost:10000 -hiveconf mapreduce.cluster.local.dir=/home/hadoop/tmp
-```
+ 
 
 
 
