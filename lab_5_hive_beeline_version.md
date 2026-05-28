@@ -284,7 +284,8 @@ ORDER BY total_listings DESC;
 
 
 The meanings of the involved fields:
-
+- `room_type`: Represents the category of the Airbnb listing (e.g., "Entire home/apt", "Private room", or "Shared room"). 
+- `id`: The unique identifer assigned to every individual property listing on Airbnb.
 
  
 
@@ -343,6 +344,13 @@ GROUP BY host_name, host_id
 ORDER BY total_properties_managed DESC
 LIMIT 10;
 ```
+
+
+The meanings of the involved fields:
+
+- `host_name`: The first name or profile name of the person managing the Airbnb listing.
+- `host_id`: The unique identifier for the host.
+- `number_of_reviews`: The total number of reviews a single property has received over its lifetime.
 
 The output should look like the following:
 
