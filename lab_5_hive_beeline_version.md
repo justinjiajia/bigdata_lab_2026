@@ -417,66 +417,69 @@ LIMIT 10;
 ```
 
 The word `date` is a reserved keyword in Hive (it is an actual data type, like `INT` or `STRING`).
-Wrap the word date in backticks (`\``) to tell Hive that we are specifically referring to a column name and not the reserved keyword, 
+Wrap the word date in backticks to tell Hive that we are specifically referring to a column name and not the reserved keyword, 
 
 
 The output should look like the following:
 
 ```shell
-INFO  : Compiling command(queryId=hive_20260528160241_43f24398-ead4-4e70-b985-0eb885e42024): SELECT  l.neighbourhood_cleansed, COUNT(r.listing_id) as total_reviews
+INFO  : Compiling command(queryId=hive_20260528171046_0b962aca-1c0c-447d-b4b5-a9cfaf1bf194): SELECT l.neighbourhood, COUNT(r.listing_id) AS reviews_in_2023
 FROM listings l JOIN reviews r ON l.id = r.listing_id
-GROUP BY l.neighbourhood_cleansed
-ORDER BY total_reviews DESC
+WHERE r.`date` LIKE '2023-%'
+GROUP BY l.neighbourhood
+ORDER BY reviews_in_2023 DESC
 LIMIT 10
 INFO  : Concurrency mode is disabled, not creating a lock manager
 INFO  : Semantic Analysis Completed (retrial = false)
-INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:l.neighbourhood_cleansed, type:string, comment:null), FieldSchema(name:total_reviews, type:bigint, comment:null)], properties:null)
-INFO  : Completed compiling command(queryId=hive_20260528160241_43f24398-ead4-4e70-b985-0eb885e42024); Time taken: 0.352 seconds
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:l.neighbourhood, type:string, comment:null), FieldSchema(name:reviews_in_2023, type:bigint, comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20260528171046_0b962aca-1c0c-447d-b4b5-a9cfaf1bf194); Time taken: 0.305 seconds
 INFO  : Concurrency mode is disabled, not creating a lock manager
-INFO  : Executing command(queryId=hive_20260528160241_43f24398-ead4-4e70-b985-0eb885e42024): SELECT  l.neighbourhood_cleansed, COUNT(r.listing_id) as total_reviews
+INFO  : Executing command(queryId=hive_20260528171046_0b962aca-1c0c-447d-b4b5-a9cfaf1bf194): SELECT l.neighbourhood, COUNT(r.listing_id) AS reviews_in_2023
 FROM listings l JOIN reviews r ON l.id = r.listing_id
-GROUP BY l.neighbourhood_cleansed
-ORDER BY total_reviews DESC
+WHERE r.`date` LIKE '2023-%'
+GROUP BY l.neighbourhood
+ORDER BY reviews_in_2023 DESC
 LIMIT 10
-INFO  : Query ID = hive_20260528160241_43f24398-ead4-4e70-b985-0eb885e42024
+INFO  : Query ID = hive_20260528171046_0b962aca-1c0c-447d-b4b5-a9cfaf1bf194
 INFO  : Total jobs = 1
 INFO  : Launching Job 1 out of 1
 INFO  : Starting task [Stage-1:MAPRED] in serial mode
-INFO  : Subscribed to counters: [] for queryId: hive_20260528160241_43f24398-ead4-4e70-b985-0eb885e42024
+INFO  : Subscribed to counters: [] for queryId: hive_20260528171046_0b962aca-1c0c-447d-b4b5-a9cfaf1bf194
 INFO  : Session is already open
-INFO  : Dag name: SELECT  l.neighbourhood_cleansed, COUNT...10 (Stage-1)
+INFO  : Dag name: SELECT l.neighbourhood, COUNT(r.listing...10 (Stage-1)
 INFO  : Setting tez.task.scale.memory.reserve-fraction to 0.30000001192092896
-INFO  : Status: Running (Executing on YARN cluster with App id application_1779976941000_0003)
+INFO  : Tez session was closed. Reopening...
+INFO  : Session re-established.
+INFO  : Session re-established.
+INFO  : Status: Running (Executing on YARN cluster with App id application_1779976941000_0005)
 
 INFO  : Map 1: -/-      Map 2: -/-      Reducer 3: 0/2  Reducer 4: 0/1
 INFO  : Map 1: 0/1      Map 2: 0/2      Reducer 3: 0/2  Reducer 4: 0/1
 INFO  : Map 1: 0/1      Map 2: 0/2      Reducer 3: 0/2  Reducer 4: 0/1
-INFO  : Map 1: 0/1      Map 2: 0(+1)/2  Reducer 3: 0/2  Reducer 4: 0/1
-INFO  : Map 1: 0(+1)/1  Map 2: 0(+2)/2  Reducer 3: 0/2  Reducer 4: 0/1
-INFO  : Map 1: 0(+1)/1  Map 2: 0(+2)/2  Reducer 3: 0/2  Reducer 4: 0/1
+INFO  : Map 1: 0(+1)/1  Map 2: 0/2      Reducer 3: 0/2  Reducer 4: 0/1
 INFO  : Map 1: 0(+1)/1  Map 2: 0(+2)/2  Reducer 3: 0/2  Reducer 4: 0/1
 INFO  : Map 1: 1/1      Map 2: 0(+2)/2  Reducer 3: 0/2  Reducer 4: 0/1
 INFO  : Map 1: 1/1      Map 2: 1(+1)/2  Reducer 3: 0(+2)/2      Reducer 4: 0/1
 INFO  : Map 1: 1/1      Map 2: 2/2      Reducer 3: 2/2  Reducer 4: 0(+1)/1
 INFO  : Map 1: 1/1      Map 2: 2/2      Reducer 3: 2/2  Reducer 4: 1/1
-INFO  : Completed executing command(queryId=hive_20260528160241_43f24398-ead4-4e70-b985-0eb885e42024); Time taken: 17.225 seconds
+INFO  : Completed executing command(queryId=hive_20260528171046_0b962aca-1c0c-447d-b4b5-a9cfaf1bf194); Time taken: 17.419 seconds
 INFO  : OK
 INFO  : Concurrency mode is disabled, not creating a lock manager
-+---------------------------+----------------+
-| l.neighbourhood_cleansed  | total_reviews  |
-+---------------------------+----------------+
-| NULL                      | 43987          |
-| Yau Tsim Mong             | 38863          |
-| Islands                   | 7292           |
-| Central & Western         | 6574           |
-| Wan Chai                  | 6389           |
-| Kowloon City              | 1440           |
-| Sai Kung                  | 1346           |
-| Eastern                   | 1179           |
-| Sham Shui Po              | 1071           |
-| Sha Tin                   | 366            |
-+---------------------------+----------------+
-10 rows selected (17.62 seconds)
++---------------------+------------------+
+|   l.neighbourhood   | reviews_in_2023  |
++---------------------+------------------+
+| Bedford-Stuyvesant  | 14393            |
+| Harlem              | 8008             |
+| Midtown             | 6080             |
+| Williamsburg        | 5783             |
+| Crown Heights       | 5538             |
+| Lower East Side     | 4915             |
+| Bushwick            | 4647             |
+| Hell's Kitchen      | 4395             |
+| Chelsea             | 3773             |
+| East Flatbush       | 3047             |
++---------------------+------------------+
+10 rows selected (17.747 seconds)
 ```
 
 
