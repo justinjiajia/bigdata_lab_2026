@@ -30,42 +30,59 @@
 
 # Services
 
+Once you are connected to the Master node of your launched EMR cluster, run the following command to check the status of the Hive services:
 
 ```shell
-[hadoop@ip-172-31-82-126 ~]$ systemctl --type=service | grep hive
+$ systemctl --type=service | grep hive
+```
+The output should display
+
+```shell
   hive-hcatalog-server.service                          loaded active running HCatalog server
   hive-server2.service                                  loaded active running Hive Server2
+```
+This indicates that these two Hive-related services are currently healthy and running in the background.
 
-[hadoop@ip-172-31-82-126 ~]$ systemctl status hive-server2
-● hive-server2.service - Hive Server2
-     Loaded: loaded (/etc/systemd/system/hive-server2.service; enabled; preset: disabled)
-     Active: active (running) since Wed 2026-05-27 07:29:24 UTC; 14min ago
-   Main PID: 12604 (bash)
-      Tasks: 43 (limit: 9497)
-     Memory: 463.5M
-        CPU: 27.378s
-     CGroup: /system.slice/hive-server2.service
-             ├─12604 /bin/bash -c "/usr/lib/hive/bin/hive --service hiveserver2 > /var/log/hive/hive-server2.out 2>&1"
-             └─12605 /usr/lib/jvm/jre-17/bin/java -Dproc_jar -Dhive.log.dir=/var/log/hive -Dhive.log.file=hive-server2.log -Dhive.log.threshol>
+You can also try `systemctl status hive-server2` (later, to exit the display mode, type `q`).
+
+#### Understanding the Architecture:
+ 
+
+`hive-server2`: Takes Hive queries from clients (like Beeline) and does the heavy lifting to execute those queries on the distributed cluster.
+
+`hive-hcatalog-server` (Metastore Service): Acts as a middleman. `hive-server2` talks to it to validate tables and schemas. It translates requests and securely reads from or writes to the underlying relational database where the metadata is actually stored.
+ 
+
+#### Exploring the Metastore Database (MariaDB)
+
+On Amazon EMR, the RDBMS that Hive uses for storing its metadata is MariaDB (an open-source fork of MySQL). The actual Hive Metastore DB files are located in `/var/lib/mysql/hive` on the Master node.
+
+To explore this, we will log directly into the MariaDB database. 
+
+First, retrieve the database password by searching the Hive configuration file:
+
+```shell
+$ grep -A 1 "javax.jdo.option.ConnectionPassword" /etc/hive/conf/hive-site.xml
 ```
 
-type `q` to exit the display of the status 
+Copy the password found inside the `<value>` tags from the output.
 
+Next, log into the MariaDB shell:
 
-The Hive Metastore and HiveServer2 run as different processes. Here is the breakdown of how they differ and why they are separate:
+```shell
+$ mysql -u hive -p
+```
 
-1. The Metastore (The Librarian/Dictionary)
-What it does: The Metastore holds all the metadata (the schema, the column names, the data types, and the HDFS directory locations). It does not hold the actual data, and it does not run SQL queries.
+Paste the password when prompted.
 
-What it actually is: It consists of two parts:
+Once you are inside the MariaDB shell, you can explore the metadata tables that Hive uses behind the scenes:
 
-A background relational database (like MySQL, PostgreSQL, or a local Derby instance) that actually stores the schema text.
+```SQL
+MariaDB [(none)]> USE hive;
+MariaDB [hive]> SHOW TABLES;
+```
 
-The Metastore Service (a Java daemon) that acts as the API, allowing other programs to read that database safely.
-
-EMR Service Name: `hive-hcatalog-server`
-
-Who uses it: HiveServer2 uses it, but so do other engines! Apache Spark, Presto, and Trino all connect to the Hive Metastore to find out where tables are located.
+ 
 
 
 # Data preparation
