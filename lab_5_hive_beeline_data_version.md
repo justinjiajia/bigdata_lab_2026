@@ -1,86 +1,3 @@
-# EMR settings
-
-- EMR release: 7.13.0 
-
-- ![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) IMPORTANT: Application: Hadoop, Hive, and Tez
-  
-- Primary instance: type: `m4.large`, quantity: 1
-
-- Core instance: type: `m4.large`, quantity: 3
-  
-- Software configurations
-    ```json
-    [
-        {
-            "classification":"core-site",
-            "properties": {
-                "hadoop.http.staticuser.user": "hadoop"
-            }
-        }
-    ]
-    ```
-
-
-- Make sure the primary node's EC2 security group has a rule allowing for "SSH" from "Anywhere".
-
-
-<br>
-
-
-
-# Services
-
-Once you are connected to the Master node of your launched EMR cluster, run the following command to check the status of the Hive services:
-
-```shell
-$ systemctl --type=service | grep hive
-```
-The output should display
-
-```shell
-  hive-hcatalog-server.service                          loaded active running HCatalog server
-  hive-server2.service                                  loaded active running Hive Server2
-```
-This indicates that these two Hive-related services are currently healthy and running in the background.
-
-You can also try `systemctl status hive-server2` (later, to exit the display mode, type `q`).
-
-#### Understanding the Architecture:
- 
-
-`hive-server2`: Takes Hive queries from clients (like Beeline) and does the heavy lifting to execute those queries on the distributed cluster.
-
-`hive-hcatalog-server` (Metastore Service): Acts as a middleman. `hive-server2` talks to it to validate tables and schemas. It translates requests and securely reads from or writes to the underlying relational database where the metadata is actually stored.
- 
-
-#### Exploring the Metastore Database (MariaDB)
-
-On Amazon EMR, the RDBMS that Hive uses for storing its metadata is MariaDB (an open-source fork of MySQL). The actual Hive Metastore DB files are located in `/var/lib/mysql/hive` on the Master node.
-
-To explore this, we will log directly into the MariaDB database. 
-
-First, retrieve the database password by searching the Hive configuration file:
-
-```shell
-$ grep -A 1 "javax.jdo.option.ConnectionPassword" /etc/hive/conf/hive-site.xml
-```
-
-Copy the password found inside the `<value>` tags from the output.
-
-Next, log into the MariaDB shell:
-
-```shell
-$ mysql -u hive -p
-```
-
-Paste the password when prompted.
-
-Once you are inside the MariaDB shell, you can explore the metadata tables that Hive uses behind the scenes:
-
-```SQL
-MariaDB [(none)]> USE hive;
-MariaDB [hive]> SHOW TABLES;
-```
 
  
 
@@ -521,3 +438,44 @@ INFO  : Concurrency mode is disabled, not creating a lock manager
 
  
 
+An Airbnb host wrote a long description for their apartment (Listing ID: 248140) and pressed the Enter key a few times to create paragraphs.
+
+In the raw CSV file, those "Enters" are saved as newline characters (\n).
+
+When Hive reads a file from HDFS, its base reader (TextInputFormat) strictly reads line-by-line. It completely ignores the CSV quote marks (") and violently chops the row in half every time it sees a newline.
+
+The remaining paragraphs get pushed to the next row. 
+
+Because they are the first thing on that new line, Hive dumps them straight into the first column (id), and all the other columns become NULL.
+
+---
+
+In Hadoop, there is a strict two-step process when reading data:
+
+The `InputFormat`: Hadoop uses a built-in tool called `TextInputFormat` to fetch the file from HDFS.
+Its only job is to chop the file into individual rows. It does this blindly by looking for the Enter key (\n).
+
+The SerDe: Once chopped, the row is handed to Hive's OpenCSVSerde, which looks at the commas and quotes to assign columns.
+
+Because the TextInputFormat chops the file before the SerDe even sees the quotes, the multiline paragraphs are already destroyed.
+Hive simply cannot handle embedded newlines in CSV files natively.
+
+
+ ### The PySpark Fix (The Modern Data Engineer Route)
+If you want to keep all 75 columns, you have to use a tool that is smart enough to respect quotes before splitting the lines. Apache Spark can do this.
+
+You can launch PySpark on your EMR master node and convert the messy CSV into a highly-optimized Parquet file in just three lines of code:
+
+python
+# Launch 'pyspark' in your terminal, then run:
+
+```
+# 1. Read the messy CSV, explicitly telling Spark it has multi-line quotes
+df = spark.read.csv("hdfs:///bigdata/airbnb/listings/listings.csv", header=True, multiLine=True, escape='"')
+
+# 2. Save it back to HDFS as a perfectly clean Parquet file
+df.write.mode("overwrite").parquet("hdfs:///bigdata/airbnb/listings_clean_parquet/")
+
+```
+
+Once that is done, you create a Hive table pointed at that Parquet folder, and the data will be flawlessly structured with zero shifted columns!
