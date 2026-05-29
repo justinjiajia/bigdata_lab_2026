@@ -64,28 +64,13 @@ To launch Beeline with a custom configuration:
 beeline -u jdbc:hive2://localhost:10000 -n hadoop
 ```
 
-Note: 
-- `beeline`: Launches the Beeline command-line tool.
-- `-u`:	The flag that tells Beeline the URL for connection.
-- `jdbc:hive2://`:	The protocol. It tells Beeline to use the standard JDBC driver specifically designed for HiveServer2.
-- `localhost`:	This tells Beeline that the Hive server is running on the same machine where you are typing the command. (In a production environment, this would be the IP address or domain name of a remote master node, like *10.0.5.24*).
-- `:10000`: The port number. Port 10000 is the universal default port that HiveServer2 listens on for incoming traffic.
-- `-hiveconf` lets us set configuration properties at startup.
-- Here, we're telling Hive where to store temporary files when it chooses to run MapReduce jobs locally.
-
-
-
-
-```shell
-beeline -u jdbc:hive2://localhost:10000 -hiveconf mapreduce.cluster.local.dir=/home/hadoop/tmp
-```
 
 
 
 
 <br>
 
-## Step 2: Creating a Table (External vs Internal)
+## Step 2: Creating an external table 
 
 
 Create the listings table:
