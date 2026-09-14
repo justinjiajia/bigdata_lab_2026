@@ -79,7 +79,7 @@ $ hadoop fs -put data /<Your ITSC Account>
 
 $ hadoop fs -ls /<Your ITSC Account>/data
 
-$ hadoop fs -cat /<Your ITSC Account>/data/pg35236.txt | tail -n50
+$ hadoop fs -cat /<Your ITSC Account>/data/pg35236.txt | tail -n 50
 
 $ hadoop fs -get /<Your ITSC Account>/data <A Directory in Local FS> 
 ```
