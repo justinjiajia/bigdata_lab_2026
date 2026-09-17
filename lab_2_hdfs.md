@@ -71,7 +71,7 @@ Note that `hadoop fs` and `hdfs dfs` are interchangeable below.
 ```shell
 $ hadoop fs -ls /
 
-$ hadoop fs -mkdir -p /<Your ITSC Account>
+$ hadoop fs -mkdir /<Your ITSC Account>
 
 $ hdfs dfs -ls /
 
