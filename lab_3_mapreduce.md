@@ -39,35 +39,15 @@
 
 <br>
 
-# Local file system operations for data preparation
 
-
-```shell
-$ mkdir data
-
-$ cd data
-
-$ wget https://archive.org/download/encyclopaediabri31156gut/pg31156.txt
-
-$ wget https://archive.org/download/encyclopaediabri34751gut/pg34751.txt
-
-$ wget https://archive.org/download/encyclopaediabri35236gut/pg35236.txt
-
-$ wget -O nytimes.txt https://raw.githubusercontent.com/justinjiajia/datafiles/main/nytimes_news_articles.txt
-
-$ cd ..
-
-$ du -sh data
-```
-
-Instead of running them one after another, we can also put them into a `.script` file and run them in batch.
+# Data preparation
 
 ```shell
-$ nano data_prep.sh
+nano data_prep.sh
 ```
 
+Copy and paste the code snippet below into the *data_prep.sh* file, and change all occurrences of `<Your ITSC Account>` to your ITSC account string. 
 
-Copy and paste the code snippet below into the file:
 
 ```shell
 #!/bin/bash
@@ -80,8 +60,11 @@ wget https://archive.org/download/encyclopaediabri34751gut/pg34751.txt
 wget https://archive.org/download/encyclopaediabri35236gut/pg35236.txt
 wget -O nytimes.txt https://raw.githubusercontent.com/justinjiajia/datafiles/main/nytimes_news_articles.txt
 cd ..
-du -sh data
+hadoop fs -mkdir /<Your ITSC Account>
+hadoop fs -put data /<Your ITSC Account>
+hadoop fs -df -h /<Your ITSC Account>/data
 ```
+
 
 Save the change and get back to the shell. Then run:
 
@@ -94,47 +77,15 @@ or
 sh data_prep.sh
 ```
 
+This allows you to do all the local and HDFS file system operations in one go.
 
-
-
-<br>
-
-# HDFS operations for data preparation
-
-You can change all `<Your ITSC Account>` placeholders below to your ITSC account string first. 
-Later, you can just copy and paste the commands to the terminal for execution
-
-Note that `hadoop fs` and `hdfs dfs` can be interchangeably used below.
-
-```shell
-hadoop fs -df -h
-```
-
-```shell
-hadoop fs -ls /
-```
-
-```shell
-hadoop fs -mkdir -p /<Your ITSC Account>
-```
-
-```shell
-hadoop fs -put data /<Your ITSC Account>
-```
-
-```shell
-hadoop fs -ls /<Your ITSC Account>/data
-```
-
-```shell
-hdfs dfs -df -h
-```
-
-You can use a HDFS filesystem checking utility to get a file's block report, e.g.,
+Then, you can use a HDFS filesystem checking utility to get a file's block report, e.g.,
 
 ```shell
 hdfs fsck /<Your ITSC Account>/data/nytimes.txt -files -blocks -locations
 ```
+
+ 
 
 <br>
 
