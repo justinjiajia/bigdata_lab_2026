@@ -1,7 +1,7 @@
 
 # EMR settings
 
-- EMR release: 7.13.0
+- EMR release: 7.14.0
 
 - Application: Hadoop
   
