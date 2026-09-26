@@ -95,14 +95,14 @@ hdfs fsck /<Your ITSC Account>/data/nytimes.txt -files -blocks -locations
 Note that `hadoop jar` and `yarn jar` can be interchangeably used below.
 
 ```shell
-hadoop jar /usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar wordcount /<Your ITSC Account>/data /<Your ITSC Account>/wordcount_output
+hadoop jar /usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar wordcount /<Your ITSC Account>/data /<Your ITSC Account>/output
 ```
 
 We can use the `-D` flag to define a value for a property in the format of `property=value`.
 E.g., we can specify the number of reducers to use as follows:
 
 ```shell
-yarn jar /usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar wordcount -D mapreduce.job.reduces=2  /<Your ITSC Account>/data /<Your ITSC Account>/wordcount_output_1
+yarn jar /usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar wordcount -D mapreduce.job.reduces=2  /<Your ITSC Account>/data /<Your ITSC Account>/output_2
 ```
 
 <br>
@@ -110,17 +110,13 @@ yarn jar /usr/lib/hadoop-mapreduce/hadoop-mapreduce-examples.jar wordcount -D ma
 # Get the output
 
 ```shell
-hadoop fs -cat /<Your ITSC Account>/wordcount_output/part-r-* > combinedresult.txt
+hadoop fs -cat /<Your ITSC Account>/output/part-r-* > combined_result.txt
 ```
 
 ```shell
-head -n20 combinedresult.txt
+head -n 20 combined_result.txt
 ```
-
-```shell
-tail -n20 combinedresult.txt
-```
-
+ 
 
 ---
 
