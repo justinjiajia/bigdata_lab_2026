@@ -117,10 +117,3 @@ hadoop fs -cat /<Your ITSC Account>/output/part-r-* > combined_result.txt
 head -n 20 combined_result.txt
 ```
  
-
-For an `m4.large` instance, this mapping is a 2:1 multiplier, meaning:
-
-YARN vCores = EC2 vCPUs × 2
-4 = 2 × 2
-
-As a result, you get the `yarn.nodemanager.resource.cpu-vcores=4` you're seeing in your configuration files.
