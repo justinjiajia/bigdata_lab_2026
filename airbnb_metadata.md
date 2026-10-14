@@ -1,5 +1,5 @@
 
-# Fields and their meanings in listings.csv
+# Fields and their meanings in *listings.csv*
 
 
 ## 📝 Listing Identification & Scrape Metadata
