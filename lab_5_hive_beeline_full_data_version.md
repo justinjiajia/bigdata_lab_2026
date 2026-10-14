@@ -172,6 +172,11 @@ You can verify that the data files have been sucessfully loaded as follows:
   
 ```shell
 !sh hadoop fs -ls /bigdata/airbnb/listings
+```
+
+You should see:
+
+```shell
 Found 1 items
 -rw-r--r--   1 hadoop hdfsadmingroup   12877434 2026-05-28 15:14 /bigdata/airbnb/listings/listings.csv
 ```
