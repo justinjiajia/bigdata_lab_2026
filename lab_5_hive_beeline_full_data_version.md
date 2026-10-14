@@ -101,7 +101,7 @@ beeline -u jdbc:hive2://localhost:10000 -n hadoop
 
 <br>
 
-## Step 2: Creating an external table 
+## Step 2: Create external tables
 
 Check out [this page](https://github.com/justinjiajia/bigdata_lab_2026/blob/main/airbnb_metadata.md) to know the meaning of each field for records in the two data files.
 
@@ -161,14 +161,14 @@ Note:
 
   <br>
 
-## Step 3
+## Step 3: Load data onto HDFS
 
 ```sql
 LOAD DATA LOCAL INPATH '/home/hadoop/data/reviews.csv' OVERWRITE INTO TABLE reviews;
 LOAD DATA LOCAL INPATH '/home/hadoop/data/listings.csv' OVERWRITE INTO TABLE listings;
 ```
 
-You can verify that the data files have been sucessfully loaded  as follows:
+You can verify that the data files have been sucessfully loaded as follows:
   
 ```shell
 !sh hadoop fs -ls /bigdata/airbnb/listings
@@ -177,17 +177,17 @@ Found 1 items
 ```
 
 
-## Step 3: Exploring Schema and Data
+## Step 4: Explore data and schema
 
 
 
-Show a brief schema:
+Show a brief table schema:
 
 ```sql
 DESCRIBE reviews;
 ```
 
-Show a detailed schema (including storage info):
+Show a detailed table schema (including storage info):
 
 ```sql
 DESCRIBE FORMATTED reviews;
@@ -202,7 +202,7 @@ SELECT * FROM listings LIMIT 5;
 
 
 
-## Step 4: Exploring analytical queries
+## Step 5: Answer analytical queries
 
 
 ### Question 1: "Which 10 neighborhoods have the highest concentration of top-tier Airbnb hosts?"
