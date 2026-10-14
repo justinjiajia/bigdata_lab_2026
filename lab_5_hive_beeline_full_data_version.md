@@ -103,6 +103,7 @@ beeline -u jdbc:hive2://localhost:10000 -n hadoop
 
 ## Step 2: Creating an external table 
 
+Check out [this page](https://github.com/justinjiajia/bigdata_lab_2026/blob/main/airbnb_metadata.md) to know the meaning of individual fields of records in the two data files.
 
 Create the listings table:
 
