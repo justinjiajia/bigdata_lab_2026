@@ -1,4 +1,32 @@
 
+# EMR settings
+
+- EMR release: 7.13.0 
+
+- ![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) IMPORTANT: Application: Hadoop, Hive, and Tez
+  
+- Primary instance: type: `m4.large`, quantity: 1
+
+- Core instance: type: `m4.large`, quantity: 3
+  
+- Software configurations
+    ```json
+    [
+        {
+            "classification":"core-site",
+            "properties": {
+                "hadoop.http.staticuser.user": "hadoop"
+            }
+        }
+    ]
+    ```
+
+
+- Make sure the primary node's EC2 security group has a rule allowing for "SSH" from "Anywhere".
+
+
+<br>
+
  
 
 
