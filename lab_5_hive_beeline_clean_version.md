@@ -52,9 +52,9 @@ mkdir data
 cd data
 
 echo -e "Downloading listings.csv\n"
-# backup: https://github.com/justinjiajia/datafiles/raw/refs/heads/main/listings.csv.gz
-wget https://data.insideairbnb.com/china/hk/hong-kong/2026-09-20/data/listings.csv.gz  
-gunzip listings.csv.gz
+wget https://github.com/justinjiajia/datafiles/raw/refs/heads/main/listings_clean.csv.gz
+gunzip listings_clean.csv.gz
+mv listings_clean.csv listings.csv
 head -n2 listings.csv
 
 echo -e "Downloading reviews.csv\n"
