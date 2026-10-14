@@ -138,8 +138,8 @@ You should see:
 
 ```shell
 Found 2 items
-drwxr-xr-x   - hadoop hdfsadmingroup          0 2026-05-28 15:04 /bigdata/airbnb/listings
-drwxr-xr-x   - hadoop hdfsadmingroup          0 2026-05-28 14:56 /bigdata/airbnb/reviews
+drwxr-xr-x   - hadoop hdfsadmingroup          0 202x-xx-xx 15:04 /bigdata/airbnb/listings
+drwxr-xr-x   - hadoop hdfsadmingroup          0 202x-xx-xx 14:56 /bigdata/airbnb/reviews
 ```
 
 This indicates that the directories that corresponds to the two tables have been created automatically.
@@ -179,7 +179,7 @@ You should see:
 
 ```shell
 Found 1 items
--rw-r--r--   1 hadoop hdfsadmingroup   12877434 2026-05-28 15:14 /bigdata/airbnb/listings/listings.csv
+-rw-r--r--   1 hadoop hdfsadmingroup   16566447 202x-xx-xx 16:49 /bigdata/airbnb/listings/listings.csv
 ```
 
 
