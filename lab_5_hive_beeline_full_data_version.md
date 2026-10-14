@@ -501,3 +501,53 @@ df.write.mode("overwrite").parquet("hdfs:///bigdata/airbnb/listings_clean_parque
 ```
 
 Once that is done, you create a Hive table pointed at that Parquet folder, and the data will be flawlessly structured with zero shifted columns!
+
+
+## spark processing
+
+```shell
+pyspark --master local[*]
+```
+
+```
+from pyspark.sql.functions import col, regexp_replace
+
+# 1. Read the local CSV
+LOCAL_CSV = "file:///home/hadoop/data/reviews.csv"
+
+
+# handles quoted line breaks in comments
+df = spark.read.option("header", True).option("multiLine", True) \
+     .option("escape", '"').option("inferSchema", True).csv(LOCAL_CSV) 
+
+
+print(f"Rows: {df.count()}  Columns: {df.columns}")
+
+
+for name, dtype in df.dtypes:
+    if dtype == "string":
+        df = df.withColumn(name, regexp_replace(col(name), r"[\r\n]+", " "))
+
+
+LOCAL_OUT  = "file:///home/hadoop/data/reviews_clean_csv/"
+
+df.coalesce(1).write.mode("overwrite").option("header", True) \
+      .option("quote", '"').option("escape", '"').csv(LOCAL_OUT)
+
+exit()
+```
+
+in the system shell:
+
+```shell
+PART=$(ls /home/hadoop/data/reviews_clean_csv/part-*.csv)
+
+
+mv "$PART" reviews_clean.csv
+gzip -c reviews_clean.csv > /home/hadoop/reviews_clean.csv.gz
+
+# aws s3 cp filename s3://your-bucket/airbnb/reviews_clean.csv
+aws s3 cp reviews_clean.csv.gz s3://ust-justinjia-isom3370/airbnb/reviews_clean.csv.gz
+```
+
+then go to s3 and download the cleaned file.
