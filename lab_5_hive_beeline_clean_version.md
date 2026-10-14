@@ -57,8 +57,9 @@ gunzip listings.csv.gz
 head -n2 listings.csv
 
 echo -e "Downloading reviews.csv\n"
-wget https://data.insideairbnb.com/china/hk/hong-kong/2026-09-20/data/reviews.csv.gz
-gunzip reviews.csv.gz
+wget https://github.com/justinjiajia/datafiles/raw/refs/heads/main/reviews_clean.csv.gz
+gunzip reviews_clean.csv.gz
+mv reviews_clean.csv reviews.csv
 head -n2 reviews.csv
 cd ..
 
