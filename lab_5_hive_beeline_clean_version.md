@@ -184,7 +184,7 @@ Found 1 items
 ```
 
 
-## Step 4: Explore data and schema
+## Step 4: Explore table schema and data
 
 
 
@@ -200,11 +200,11 @@ Show a detailed table schema (including storage info):
 DESCRIBE FORMATTED reviews;
 ```
 
-Display the first 5 records to have a preview:
+Display the first several records to have a preview:
 
 ```sql
 SELECT * FROM reviews LIMIT 5;
-SELECT * FROM listings LIMIT 5;
+SELECT * FROM listings LIMIT 2;
 ```
 
 
