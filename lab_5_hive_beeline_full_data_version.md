@@ -32,9 +32,10 @@
 
 Next, we'll get some real-world data to analyze.  
 
-Data source: [Inside Airbnb](https://insideairbnb.com/get-the-data/ ):
+Data source: [Inside Airbnb](https://insideairbnb.com/get-the-data/)
 
- <img width="800"   src="https://github.com/user-attachments/assets/d8d303d1-51ff-4c77-abd6-03b0dab6956c" />
+<img width="800"   src="https://github.com/user-attachments/assets/ee78f2d9-e618-4ca7-9a8f-8457221221d9" />
+
  
 
 ```shell
