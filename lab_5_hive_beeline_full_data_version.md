@@ -28,9 +28,14 @@
 <br>
 
  
-
-
 # Data preparation
+
+Next, we'll get some real-world data to analyze.  
+
+Data source: [Inside Airbnb](https://insideairbnb.com/get-the-data/ ):
+
+ <img width="800"   src="https://github.com/user-attachments/assets/d8d303d1-51ff-4c77-abd6-03b0dab6956c" />
+ 
 
 ```shell
 nano script.sh
