@@ -53,13 +53,13 @@ cd data
 
 echo -e "Downloading listings.csv\n"
 
-wget https://github.com/justinjiajia/datafiles/raw/refs/heads/main/HK_listings.csv.gz  -O listings.csv.gz
+wget https://data.insideairbnb.com/china/hk/hong-kong/2026-09-20/data/listings.csv.gz  
 gunzip listings.csv.gz
 head -n2 listings.csv
 
 echo -e "Downloading reviews.csv\n"
 
-wget https://github.com/justinjiajia/datafiles/raw/refs/heads/main/HK_reviews.csv.gz -O reviews.csv.gz
+wget https://data.insideairbnb.com/china/hk/hong-kong/2026-09-20/data/reviews.csv.gz
 gunzip reviews.csv.gz
 head -n2 reviews.csv
 cd ..
