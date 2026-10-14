@@ -255,4 +255,22 @@ ORDER BY total_reviews DESC
 LIMIT 10;
 ```
 
+#### Question 4: ""
 
+<img width="400" src="https://github.com/user-attachments/assets/8087f294-7b54-4ea9-ab91-82e6e58ce70d" />
+
+
+```sql
+SELECT 
+    host_name AS `Host Name`,
+    SUM(CASE WHEN room_type = 'Entire home/apt' THEN 1 ELSE 0 END) AS `#Entire homes/apts`,
+    SUM(CASE WHEN room_type = 'Private room' THEN 1 ELSE 0 END) AS `#private rooms`,
+    SUM(CASE WHEN room_type = 'Shared room' THEN 1 ELSE 0 END) AS `#shared rooms`,
+    SUM(CASE WHEN room_type = 'Hotel room' THEN 1 ELSE 0 END) AS `#hotel rooms`,
+    COUNT(*) AS `#listings`
+FROM listings
+WHERE host_name IS NOT NULL AND host_name != ''
+GROUP BY host_name
+ORDER BY `#listings` DESC
+LIMIT 10;
+```
