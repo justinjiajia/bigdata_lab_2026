@@ -1,7 +1,7 @@
 
 # EMR settings
 
-- EMR release: 7.13.0 
+- EMR release: 7.14.0 
 
 - ![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) IMPORTANT: Application: Hadoop, Hive, and Tez
   
