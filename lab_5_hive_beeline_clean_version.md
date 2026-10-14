@@ -262,6 +262,7 @@ LIMIT 10;
 
 ```sql
 SELECT 
+    host_id,
     host_name AS `Host Name`,
     SUM(CASE WHEN room_type = 'Entire home/apt' THEN 1 ELSE 0 END) AS `#Entire homes/apts`,
     SUM(CASE WHEN room_type = 'Private room' THEN 1 ELSE 0 END) AS `#private rooms`,
@@ -269,8 +270,8 @@ SELECT
     SUM(CASE WHEN room_type = 'Hotel room' THEN 1 ELSE 0 END) AS `#hotel rooms`,
     COUNT(*) AS `#listings`
 FROM listings
-WHERE host_name IS NOT NULL AND host_name != ''
-GROUP BY host_name
+WHERE host_id IS NOT NULL AND host_id != ''
+GROUP BY host_id, host_name
 ORDER BY `#listings` DESC
 LIMIT 10;
 ```
