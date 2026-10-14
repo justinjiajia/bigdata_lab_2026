@@ -150,7 +150,7 @@ SHOW TABLES;
 
 Note:
 
-- If you **don't** use the `EXTERNAL` keyword, Hive creates the table in **internal mode**, meaning:
+- If you don't use the `EXTERNAL` keyword, Hive creates the table in **internal mode**, meaning:
 
   - Hive manages the data entirely.
   - Dropping the table will delete the underlying data stored in HDFS, e.g., `/user/hive/warehouse/books`.
