@@ -509,6 +509,8 @@ Once that is done, you create a Hive table pointed at that Parquet folder, and t
 pyspark --master local[*]
 ```
 
+do the following for both files
+
 ```
 from pyspark.sql.functions import col, regexp_replace
 
