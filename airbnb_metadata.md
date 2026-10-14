@@ -133,3 +133,47 @@ These are not scraped from Airbnb but computed by Inside Airbnb.
 | Field | Meaning |
 |---|---|
 | `license` | License or registration number, if provided by the host (often blank). |
+
+
+# Fields and their meanings in *reviews.csv*
+
+## 📝 Review Identification
+
+| Field | Meaning |
+|---|---|
+| `listing_id` | Airbnb listing ID that the review belongs to. This is a foreign key linking to the `id` field in `listings.csv`. |
+| `id` | Airbnb's unique identifier for the review itself. |
+| `date` | Date the review was posted, in `YYYY-MM-DD` format. |
+
+## 👤 Reviewer Information
+
+| Field | Meaning |
+|---|---|
+| `reviewer_id` | Airbnb's unique identifier for the user who wrote the review. |
+| `reviewer_name` | First name of the reviewer (free text). |
+
+## 💬 Review Content
+
+| Field | Meaning |
+|---|---|
+| `comments` | The full text of the review left by the guest. May contain line breaks, punctuation, and non-English characters. |
+
+## 🔗 Relationship to Other Files
+
+| Field | Meaning |
+|---|---|
+| `listing_id` | Use this to join reviews to listings. It matches `id` in `listings.csv`. |
+| `reviewer_id` | Can be used to identify repeat reviewers or link to other Airbnb user data, if available. |
+
+## 🧾 Example Record Interpretation
+
+| Column | Value |
+|---|---|
+| `listing_id` | `72571` |
+| `id` | `188791` |
+| `date` | `2011-02-26` |
+| `reviewer_id` | `380778` |
+| `reviewer_name` | `Katherine` |
+| `comments` | `Brenden is really helpful to us. We had a really pleasant stay in this place, the location is excellent, convenient, and has real character. We definitely will come back to stay there again next time when we go to HongKong!` |
+
+This record means that reviewer Katherine (`reviewer_id = 380778`) posted review `188791` on `2011-02-26` for listing `72571`. The review text praises the host Brendan, the location, convenience, and character of the place.
