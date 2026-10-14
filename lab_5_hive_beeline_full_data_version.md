@@ -52,20 +52,17 @@ mkdir data
 cd data
 
 echo -e "Downloading listings.csv\n"
-
 wget https://data.insideairbnb.com/china/hk/hong-kong/2026-09-20/data/listings.csv.gz  
 gunzip listings.csv.gz
 head -n2 listings.csv
 
 echo -e "Downloading reviews.csv\n"
-
 wget https://data.insideairbnb.com/china/hk/hong-kong/2026-09-20/data/reviews.csv.gz
 gunzip reviews.csv.gz
 head -n2 reviews.csv
 cd ..
 
 echo -e "Display the downloaded files\n"
-
 ls -lh data
 ```
 
