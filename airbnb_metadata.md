@@ -2,7 +2,7 @@
 # Fields and their meanings in listings.csv
 
 
-## Listing Identification & Scrape Metadata
+## 📝 Listing Identification & Scrape Metadata
 
 | Field | Meaning |
 |---|---|
@@ -12,7 +12,7 @@
 | `last_scraped` | Date the listing data was last scraped (e.g., `2026-09-25`). |
 | `source` | Source of the listing record - typically `city scrape` (found in the current scrape) or `previous scrape` (carried over from an earlier scrape). |
 
-## Host Information
+## 👤 Host Information
 
 | Field | Meaning |
 |---|---|
@@ -39,7 +39,7 @@
 | `host_has_profile_pic` | Whether the host has a profile picture (`t`/`f`). |
 | `host_identity_verified` | Whether the host's identity has been verified (`t`/`f`). |
 
-## Location & Neighbourhood
+## 📍 Location & Neighbourhood
 
 | Field | Meaning |
 |---|---|
@@ -48,7 +48,7 @@
 | `neighbourhood_group_cleansed` | Higher-level neighbourhood group (e.g., district). |
 | `latitude` / `longitude` | Geographic coordinates of the listing (WGS84). |
 
-## Property Details
+## 🏠 Property Details
 
 | Field | Meaning |
 |---|---|
@@ -61,7 +61,7 @@
 | `beds` | Number of beds. |
 | `amenities` | JSON-like list of amenities provided (e.g., Washer, Wifi). |
 
-## Pricing & Booking Rules
+## 💰 Pricing & Booking Rules
 
 | Field | Meaning |
 |---|---|
@@ -81,7 +81,7 @@
 | `maximum_nights_avg_ntm` | Average `maximum_nights` over the next 365 nights. |
 | `instant_bookable` | Whether guests can book instantly without host approval (`t`/`f`). |
 
-## Availability
+## 📅 Availability
 
 | Field | Meaning |
 |---|---|
@@ -94,7 +94,7 @@
 | `calendar_last_scraped` | Date the calendar data was last scraped. |
 | `availability_eoy` | Availability at end of year (derived from calendar). |
 
-## Reviews & Ratings
+## ⭐ Reviews & Ratings
 
 | Field | Meaning |
 |---|---|
@@ -113,7 +113,7 @@
 | `review_scores_value` | Value-for-money rating. |
 | `reviews_per_month` | Average number of reviews per month over the listing's lifetime. |
 
-## Derived & Calculated Fields
+## 📊 Derived & Calculated Fields
 
 These are not scraped from Airbnb but computed by Inside Airbnb.
 
@@ -121,14 +121,14 @@ These are not scraped from Airbnb but computed by Inside Airbnb.
 |---|---|
 | `neighbourhood_cleansed` | Neighbourhood derived from coordinates. |
 | `estimated_occupancy_l365d` | Estimated number of nights booked in the last 365 days (based on review frequency). |
-| `estimated_revenue_l365d` | Estimated revenue over the last 365 days (occupancy x nightly price). |
+| `estimated_revenue_l365d` | Estimated revenue over the last 365 days (occupancy × nightly price). |
 | `calculated_host_listings_count` | Number of listings the host has in the current scrape (city-wide). |
 | `calculated_host_listings_count_entire_homes` | Number of entire-home listings the host has. |
 | `calculated_host_listings_count_private_rooms` | Number of private-room listings the host has. |
 | `calculated_host_listings_count_shared_rooms` | Number of shared-room listings the host has. |
 | `reviews_per_month` | Average reviews per month (derived from review history). |
 
-## Legal & Administrative
+## 📜 Legal & Administrative
 
 | Field | Meaning |
 |---|---|
