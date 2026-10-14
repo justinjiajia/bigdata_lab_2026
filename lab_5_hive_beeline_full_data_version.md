@@ -141,7 +141,7 @@ drwxr-xr-x   - hadoop hdfsadmingroup          0 2026-05-28 15:04 /bigdata/airbnb
 drwxr-xr-x   - hadoop hdfsadmingroup          0 2026-05-28 14:56 /bigdata/airbnb/reviews
 ```
 
-This indicates that the directories that corresponds to the two tables have benn created automatically.
+This indicates that the directories that corresponds to the two tables have been created automatically.
 
 
 ```sql
