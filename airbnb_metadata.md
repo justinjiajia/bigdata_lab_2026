@@ -134,6 +134,13 @@ These are not scraped from Airbnb but computed by Inside Airbnb.
 |---|---|
 | `license` | License or registration number, if provided by the host (often blank). |
 
+<br>
+
+
+---
+
+<br>
+
 
 # Fields and their meanings in *reviews.csv*
 
