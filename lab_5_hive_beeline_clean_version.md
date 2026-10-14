@@ -204,7 +204,7 @@ Display the first several records to have a preview:
 
 ```sql
 SELECT * FROM reviews LIMIT 5;
-SELECT * FROM listings LIMIT 2;
+SELECT id, name, neighbourhood, neighbourhood_cleansed FROM listings LIMIT 10;
 ```
 
 
