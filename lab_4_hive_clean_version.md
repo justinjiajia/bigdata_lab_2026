@@ -102,6 +102,7 @@ Now that the data is on the primary node, we need a way to query it.
 
 Hive provides a SQL-like interface over HDFS, and Beeline is the command-line client we'll use to talk to HiveServer2.
 
+Rather than writing MapReduce jobs by hand, we can express what we want to compute in SQL, and Hive translates it into a distributed job that runs across the cluster.
 
 <br>
 
