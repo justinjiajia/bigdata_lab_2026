@@ -27,6 +27,30 @@
 
 <br>
 
+
+# Services
+
+Once you are connected to the primary-node instance, run the following command to check the status of the Hive services:
+
+```shell
+$ systemctl --type=service | grep hive
+```
+The output should display
+
+```shell
+  hive-hcatalog-server.service                          loaded active running HCatalog server
+  hive-server2.service                                  loaded active running Hive Server2
+```
+
+This indicates that these two Hive-related services are currently healthy and running in the background.
+ 
+
+ - `hive-server2`: Takes Hive queries from clients (like Beeline) and does the heavy lifting to execute those queries on the distributed cluster.
+
+- `hive-hcatalog-server` (Metastore Service): Acts as a middleman. `hive-server2` talks to it to validate tables and schemas. It translates requests and securely reads from or writes to the underlying relational database where the metadata is actually stored.
+
+
+ <br>
  
 # Data preparation
  
@@ -347,3 +371,12 @@ Apply the same grouping and aggregation techniques to reproduce the output shown
 
 <img width="400"   src="https://github.com/user-attachments/assets/c11e137f-5e96-41bc-8f06-acaeff3f268a" />
 
+
+# Optional: Use MapReduce
+
+
+If you are experimenting and want to force Hive to fall back to legacy MapReduce, you can pass the engine configuration when launching Beeline:
+
+```shell
+beeline -u jdbc:hive2://localhost:10000 -n hadoop -hiveconf hive.execution.engine=mr
+```
