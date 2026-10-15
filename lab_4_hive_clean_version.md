@@ -42,7 +42,7 @@ The output should display
   hive-server2.service                                  loaded active running Hive Server2
 ```
 
-This indicates that these two Hive-related services are currently healthy and running in the background.
+This indicates that these two Hive-related services are currently running in the background.
  
 
  - `hive-server2`: Takes Hive queries from clients (like Beeline) and does the heavy lifting to execute those queries on the distributed cluster.
