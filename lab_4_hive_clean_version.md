@@ -117,7 +117,7 @@ What the flags mean:
 
 - `-u jdbc:hive2://localhost:10000`: connects to HiveServer2 running on the local machine (the primary node) on its default port `10000`.
 
--`-n hadoop`: authenticates as user `hadoop`, which is the default user on EMR and has permissions to create tables in HDFS.
+- `-n hadoop`: authenticates as user `hadoop`, which is the default user on EMR and has permissions to create tables in HDFS.
 
 Once Beeline starts, you'll see a `0: jdbc:hive2://localhost:10000>` prompt. All the SQL below is typed there.
 
@@ -212,7 +212,7 @@ What the keywords mean:
 
 - Why `LOCAL`? Without `LOCAL`, Hive would look for the file in HDFS. With `LOCAL`, it looks on the local filesystem of the node where Beeline is running.   
 
-- `OVERWRITE` replaces any existing data in the target table.
+- `OVERWRITE` replaces any existing data in the target table. If you omit it, Hive will simply add the file alongside any existing ones, causing duplicates.
 
 You can verify that the data files have been sucessfully loaded as follows:
  
@@ -241,6 +241,8 @@ Show a detailed table schema (including storage info):
 DESCRIBE FORMATTED reviews;
 ```
 
+The `FORMATTED` variant prints extra metadata like the table location, SerDe class, and table type. It is useful when you want to double-check that Hive is reading the right directory with the right CSV settings.
+
 Preview a few records. `LIMIT` restricts the output size:
 
 
@@ -263,7 +265,7 @@ Each question below uses a different SQL technique — aggregation, conditional 
 
 ### Question 1: "Which 10 neighborhoods have the most unique Superhosts?"
 
-Count unique Superhosts in each neighborhood and display the top 10. `COUNT(DISTINCT host_id)` avoids counting a host multiple times within the same neighborhood.
+Count unique Superhosts in each neighborhood and display the top 10. `COUNT(DISTINCT host_id)` avoids counting a host multiple times within the same neighborhood. This matters because a host may run several listings in the same area.
 
 ```sql
 SELECT neighbourhood_cleansed, COUNT(DISTINCT host_id) AS number_of_superhosts
@@ -284,7 +286,10 @@ The meanings of the involved fields:
 
 #### Question 2: "Do Superhost listings have higher average ratings and more reviews?"
 
-Next, compare listings with and without Superhost status. Grouping by `host_is_superhost` gives the listing count, average rating, and average review count for each group.
+
+
+Next, compare listings with and without Superhost status. Grouping by `host_is_superhost` gives the listing count, average rating, and average review count for each group. By comparing the two rows side-by-side, we can see whether the Superhost badge actually reflects better guest experiences.
+
 
 ```sql
 SELECT host_is_superhost, COUNT(id) AS total_listings, AVG(review_scores_rating) AS avg_rating, AVG(number_of_reviews) AS avg_reviews
@@ -316,7 +321,7 @@ Finally, each city's exploration page includes a table showing the Airbnb hosts 
 
 Let's try to reproduce this table.
 
-Summarize each host's listings by room type. Each `CASE` expression returns 1 for a matching room type and 0 otherwise; `SUM` counts the matches. 
+Summarize each host's listings by room type. Each `CASE` expression returns 1 for a matching room type and 0 otherwise; `SUM` counts the matches. This is called conditional aggregation — it lets us compute several category counts in a single pass over the data, without needing a pivot operation.
 
 ```sql
 SELECT 
