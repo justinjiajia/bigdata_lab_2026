@@ -299,9 +299,9 @@ ORDER BY `#listings` DESC
 LIMIT 10;
 ```
 
-### Practice
+# Practice
 
-Apply the same grouping and aggregation techniques to reproduce the output shown below.
+Apply the same grouping and aggregation techniques to reproduce the output shown below: find the top 10 hosts who have the most listings.
 
 
 <img width="400"   src="https://github.com/user-attachments/assets/c11e137f-5e96-41bc-8f06-acaeff3f268a" />
