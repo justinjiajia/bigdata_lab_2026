@@ -126,7 +126,7 @@ CREATE EXTERNAL TABLE listings (
 )
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES ("separatorChar" = ",", "quoteChar" = "\"", "escapeChar" = "\\")
-LOCATION '/bigdata/airbnb/listings'
+LOCATION '/<your ITSC account>/airbnb/listings'
 TBLPROPERTIES ("skip.header.line.count"="1");
 ```
 
@@ -137,7 +137,7 @@ Next, create the `reviews` table using the same CSV settings:
 CREATE EXTERNAL TABLE reviews (`listing_id` STRING, `id` STRING, `date` STRING, `reviewer_id` STRING, `reviewer_name` STRING, `comments` STRING)
 ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
 WITH SERDEPROPERTIES ("separatorChar" = ",", "quoteChar" = "\"", "escapeChar" = "\\")
-LOCATION '/bigdata/airbnb/reviews'
+LOCATION '/<your ITSC account>/airbnb/reviews'
 TBLPROPERTIES ("skip.header.line.count"="1");
 ```
 
@@ -151,15 +151,15 @@ Check the HDFS directories associated with the tables:
 
 
 ```shell
-!sh hadoop fs -ls /bigdata/airbnb
+!sh hadoop fs -ls /<your ITSC account>/airbnb
 ```
 
 You should see:
 
 ```shell
 Found 2 items
-drwxr-xr-x   - hadoop hdfsadmingroup          0 202x-xx-xx 15:04 /bigdata/airbnb/listings
-drwxr-xr-x   - hadoop hdfsadmingroup          0 202x-xx-xx 14:56 /bigdata/airbnb/reviews
+drwxr-xr-x   - hadoop hdfsadmingroup          0 202x-xx-xx 15:04 /<your ITSC account>/airbnb/listings
+drwxr-xr-x   - hadoop hdfsadmingroup          0 202x-xx-xx 14:56 /<your ITSC account>/airbnb/reviews
 ```
 
 This output confirms that the two table directories exist in HDFS.
@@ -187,14 +187,14 @@ LOAD DATA LOCAL INPATH '/home/hadoop/data/listings.csv' OVERWRITE INTO TABLE lis
 Verify that the *listings* file has been loaded into HDFS:
   
 ```shell
-!sh hadoop fs -ls /bigdata/airbnb/listings
+!sh hadoop fs -ls /<your ITSC account>/airbnb/listings
 ```
 
 You should see:
 
 ```shell
 Found 1 items
--rw-r--r--   1 hadoop hdfsadmingroup   16566447 202x-xx-xx 16:49 /bigdata/airbnb/listings/listings.csv
+-rw-r--r--   1 hadoop hdfsadmingroup   16566447 202x-xx-xx 16:49 /<your ITSC account>/airbnb/listings/listings.csv
 ```
 
 
