@@ -33,7 +33,7 @@
 Next, we'll get some real-world data to analyze.  
 
 
-## About the Data Source
+## About the data
 
  
 [Inside Airbnb](https://insideairbnb.com/get-the-data/) provides publicly available datasets for exploring Airbnb listings and activity in cities around the world. In this lab, we will use the Hong Kong listings and reviews datasets dated September 20. The listings data describes properties and their hosts, while the reviews data contains guest reviews linked to individual listings. Together, these datasets allow us to analyze hosts, room types, neighborhoods, and review activity using Hive.
@@ -87,7 +87,7 @@ sh script.sh
 
 <br>
 
-# Use SQL-like Queries with Hive
+# Use SQL-like queries with Hive
 
 With the CSV files downloaded, define Hive tables, load the data into HDFS, and run SQL queries.
 
