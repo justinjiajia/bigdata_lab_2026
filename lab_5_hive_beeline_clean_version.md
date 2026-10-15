@@ -167,9 +167,6 @@ SHOW TABLES;
 
 Note: External tables normally retain their data when dropped. Without `EXTERNAL`, Hive creates a **managed** table, whose data is normally deleted when the table is dropped.
  
-   
-
-  
 
   <br>
 
@@ -276,7 +273,7 @@ LIMIT 10;
 
 #### Question 4: "Which 10 hosts have the most listings, and what room types do they offer?"
 
-Finally, 
+
 
 Finally, each city's exploration page includes a table showing the Airbnb hosts with the most listings and a breakdown of their listings by room type. 
 
