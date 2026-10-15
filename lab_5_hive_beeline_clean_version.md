@@ -32,11 +32,13 @@
 
 Next, we'll get some real-world data to analyze.  
 
-Data source: [Inside Airbnb](https://insideairbnb.com/get-the-data/)
 
-<img width="800"   src="https://github.com/user-attachments/assets/ee78f2d9-e618-4ca7-9a8f-8457221221d9" />
+## About the Data Source
 
+ 
+[Inside Airbnb](https://insideairbnb.com/get-the-data/) provides publicly available datasets for exploring Airbnb listings and activity in cities around the world. In this lab, we will use the Hong Kong listings and reviews datasets dated September 20. The listings data describes properties and their hosts, while the reviews data contains guest reviews linked to individual listings. Together, these datasets allow us to analyze hosts, room types, neighborhoods, and review activity using Hive.
 
+## Download data
 
 In the SSH terminal, start from `/home/hadoop` and create a download script:
 
