@@ -36,14 +36,16 @@ Data source: [Inside Airbnb](https://insideairbnb.com/get-the-data/)
 
 <img width="800"   src="https://github.com/user-attachments/assets/ee78f2d9-e618-4ca7-9a8f-8457221221d9" />
 
- 
+
+
+In the SSH terminal, start from `/home/hadoop` and create a download script:
 
 ```shell
 nano script.sh
 ```
 
-Copy and paste the code snippet below into the *script.sh* file. 
 
+Copy and paste the code below into *script.sh*. It downloads and decompresses both files, renames them, and previews the header and first data row. 
 
 ```shell
 #!/bin/bash
@@ -69,7 +71,7 @@ ls -lh data
 ```
 
 
-Save the change and get back to the shell. Then run:
+Save the file (`Ctrl+O`, then `Enter`) and exit nano (`Ctrl+X`). Run the script:
 
 ```shell
 bash script.sh
@@ -81,23 +83,24 @@ sh script.sh
 ```
  
 
-
-
 <br>
 
 # Use SQL-like Queries with Hive
+
+With the CSV files downloaded, define Hive tables, load the data into HDFS, and run SQL queries.
 
 <br>
 
 ## Step 1: Open the Beeline CLI  
 
-To launch Beeline with a custom configuration:
+Open Beeline and connect to HiveServer2 on the primary node as user `hadoop`:
 
 ```shell
 beeline -u jdbc:hive2://localhost:10000 -n hadoop
 ```
 
 
+Run the following SQL statements inside Beeline. Commands beginning with `!sh` run shell commands without leaving Beeline.
 
 
 
@@ -105,9 +108,12 @@ beeline -u jdbc:hive2://localhost:10000 -n hadoop
 
 ## Step 2: Create external tables
 
+Before loading the data, define the columns and CSV format for each table. Creating a table defines its schema; it does not yet load the downloaded records.
+
+
 Check out [this page](https://github.com/justinjiajia/bigdata_lab_2026/blob/main/airbnb_metadata.md) to know the meaning of each field for records in the two data files.
 
-Create the listings table:
+Create the `listings` table:
 
 ```sql
 CREATE EXTERNAL TABLE listings (
@@ -120,7 +126,7 @@ TBLPROPERTIES ("skip.header.line.count"="1");
 ```
 
 
-Create the reviews table:
+Next, create the `reviews` table using the same CSV settings:
 
 ```sql
 CREATE EXTERNAL TABLE reviews (`listing_id` STRING, `id` STRING, `date` STRING, `reviewer_id` STRING, `reviewer_name` STRING, `comments` STRING)
@@ -129,6 +135,14 @@ WITH SERDEPROPERTIES ("separatorChar" = ",", "quoteChar" = "\"", "escapeChar" = 
 LOCATION '/bigdata/airbnb/reviews'
 TBLPROPERTIES ("skip.header.line.count"="1");
 ```
+
+The table definitions use:
+
+- `OpenCSVSerde`: reads CSV fields using the specified separator, quote, and escape characters.
+- `LOCATION`: specifies the HDFS directory for each table.
+- `skip.header.line.count`: skips the CSV header row.
+
+Check the HDFS directories associated with the tables:
 
 
 ```shell
@@ -143,20 +157,16 @@ drwxr-xr-x   - hadoop hdfsadmingroup          0 202x-xx-xx 15:04 /bigdata/airbnb
 drwxr-xr-x   - hadoop hdfsadmingroup          0 202x-xx-xx 14:56 /bigdata/airbnb/reviews
 ```
 
-This indicates that the directories that corresponds to the two tables have been created automatically.
+This output confirms that the two table directories exist in HDFS.
 
+Also check that both tables are registered in Hive:
 
 ```sql
 SHOW TABLES;
 ```
 
-Note:
-
-- If you don't use the `EXTERNAL` keyword, Hive creates the table in **internal mode**, meaning:
-
-  - Hive manages the data entirely, and stores the data in the default location in HDFS, e.g., */user/hive/warehouse/listings*.
-  - Dropping the table will delete the underlying data stored in HDFS, e.g., */user/hive/warehouse/listings*.
-
+Note: External tables normally retain their data when dropped. Without `EXTERNAL`, Hive creates a **managed** table, whose data is normally deleted when the table is dropped.
+ 
    
 
   
@@ -165,12 +175,14 @@ Note:
 
 ## Step 3: Load data onto HDFS
 
+Now load the downloaded CSV files into the table directories. `LOCAL` refers to the local filesystem; `OVERWRITE` replaces any existing data in the target table.
+
 ```sql
 LOAD DATA LOCAL INPATH '/home/hadoop/data/reviews.csv' OVERWRITE INTO TABLE reviews;
 LOAD DATA LOCAL INPATH '/home/hadoop/data/listings.csv' OVERWRITE INTO TABLE listings;
 ```
 
-You can verify that the data files have been sucessfully loaded as follows:
+Verify that the *listings* file has been loaded into HDFS:
   
 ```shell
 !sh hadoop fs -ls /bigdata/airbnb/listings
@@ -187,8 +199,9 @@ Found 1 items
 ## Step 4: Explore table schema and data
 
 
+With the data loaded, inspect the table definitions and preview a few rows before running analytical queries.
 
-Show a brief table schema:
+Show the column names and data types:
 
 ```sql
 DESCRIBE reviews;
@@ -200,7 +213,8 @@ Show a detailed table schema (including storage info):
 DESCRIBE FORMATTED reviews;
 ```
 
-Display the first several records to have a preview:
+Preview a few records. `LIMIT` restricts the output size:
+
 
 ```sql
 SELECT * FROM reviews LIMIT 5;
@@ -212,9 +226,12 @@ SELECT id, name, neighbourhood, neighbourhood_cleansed FROM listings LIMIT 10;
 ## Step 5: Answer analytical queries
 
 
-### Question 1: "Which 10 neighborhoods have the highest concentration of top-tier Airbnb hosts?"
+Now use filtering, aggregation, and joins to explore hosts, neighborhoods, and reviews.
 
-Specifically, we want to count the actual number of unique people who have earned *Superhost* status in each neighborhood, rank those neighborhoods from highest to lowest, and select the top 10 neighborhoods for display.
+
+### Question 1: "Which 10 neighborhoods have the most unique Superhosts?"
+
+Count unique Superhosts in each neighborhood and display the top 10. `COUNT(DISTINCT host_id)` avoids counting a host multiple times within the same neighborhood.
 
 ```sql
 SELECT neighbourhood_cleansed, COUNT(DISTINCT host_id) AS number_of_superhosts
@@ -224,28 +241,30 @@ ORDER BY number_of_superhosts DESC
 LIMIT 10;
 ```
 
-
 The meanings of the involved fields:
 
-- `host_is_superhost`: A string flag indicating whether Airbnb has awarded the host "Superhost" status (a designation for highly rated, reliable hosts). We filter for 't' to ensure we are only looking at Superhosts.	't' (true)'f' (false)'' (empty/null)
+- `host_is_superhost`: Superhost status; `'t'` means true and `'f'` means false. The query keeps only `'t'` records.
 - `neighbourhood_cleansed`:	The standardized, official name of the district or neighborhood where the listing is located.
 - `host_id`: A unique ID assigned by Airbnb to every user who hosts a property.
  
+ 
 
 
-#### Question 2: "Does being a "Superhost" actually correlate with better ratings and more reviews? "
+#### Question 2: "Do Superhost listings have higher average ratings and more reviews?"
+
+Next, compare listings with and without Superhost status. Grouping by `host_is_superhost` gives the listing count, average rating, and average review count for each group.
 
 ```sql
-SELECT  host_is_superhost, COUNT(id) AS total_listings, AVG(review_scores_rating) AS avg_rating, AVG(number_of_reviews) AS avg_reviews
+SELECT host_is_superhost, COUNT(id) AS total_listings, AVG(review_scores_rating) AS avg_rating, AVG(number_of_reviews) AS avg_reviews
 FROM listings WHERE host_is_superhost IN ('t', 'f')
 GROUP BY host_is_superhost;
 ```
 
 
 
-#### Question 3: "Which 10 neighborhoods have the highest overall guest engagement and visitor activity?"
+#### Question 3: "Which 10 neighborhoods have the most reviews?"
 
-Since Airbnb does not explicitly tell us exactly how many people booked a stay in each area, we use reviews as a proxy for visitor foot traffic.
+Join `listings` with `reviews` to count reviews by neighborhood. The join matches each review to its listing using `l.id = r.listing_id`. Review counts are a proxy for activity, not a direct count of guests or bookings.
 
 ```sql
 SELECT  l.neighbourhood_cleansed, COUNT(r.listing_id) as total_reviews 
@@ -255,7 +274,9 @@ ORDER BY total_reviews DESC
 LIMIT 10;
 ```
 
-#### Question 4: ""
+#### Question 4: "Which 10 hosts have the most listings, and what room types do they offer?"
+
+Finally, summarize each host's listings by room type. Each `CASE` expression returns 1 for a matching room type and 0 otherwise; `SUM` counts the matches.
 
 <img width="400" src="https://github.com/user-attachments/assets/8087f294-7b54-4ea9-ab91-82e6e58ce70d" />
 
@@ -277,6 +298,8 @@ LIMIT 10;
 ```
 
 ### Practice
+
+Apply the same grouping and aggregation techniques to reproduce the output shown below.
 
 
 <img width="400"   src="https://github.com/user-attachments/assets/c11e137f-5e96-41bc-8f06-acaeff3f268a" />
