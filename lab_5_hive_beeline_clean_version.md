@@ -276,10 +276,15 @@ LIMIT 10;
 
 #### Question 4: "Which 10 hosts have the most listings, and what room types do they offer?"
 
-Finally, summarize each host's listings by room type. Each `CASE` expression returns 1 for a matching room type and 0 otherwise; `SUM` counts the matches.
+Finally, 
+
+Finally, each city's exploration page includes a table showing the Airbnb hosts with the most listings and a breakdown of their listings by room type. 
 
 <img width="400" src="https://github.com/user-attachments/assets/8087f294-7b54-4ea9-ab91-82e6e58ce70d" />
 
+Let's try to reproduce this table.
+
+Summarize each host's listings by room type. Each `CASE` expression returns 1 for a matching room type and 0 otherwise; `SUM` counts the matches. 
 
 ```sql
 SELECT 
