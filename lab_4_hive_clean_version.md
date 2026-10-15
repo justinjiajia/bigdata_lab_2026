@@ -35,6 +35,9 @@ Next, we'll get some real-world data to analyze.
 
 ## About the data
 
+
+<img width="800" src="https://github.com/user-attachments/assets/29e62040-a2ee-4a47-ba65-4162fbdb380a" />
+
 <img width="800"   src="https://github.com/user-attachments/assets/ee78f2d9-e618-4ca7-9a8f-8457221221d9" />
 
 &nbsp;
