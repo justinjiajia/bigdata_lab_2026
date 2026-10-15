@@ -82,7 +82,7 @@ ls -lh data
 
 Save the change (`Ctrl+O`, then `Enter`) and exit nano (`Ctrl+X`). 
 
-Run the script once getting back to the shell :
+Run the script once getting back to the SSH shell:
 
 ```shell
 bash script.sh
