@@ -29,9 +29,10 @@
 
  
 # Data preparation
+ 
+With the cluster up and running, the next step is to get the data onto the primary node. 
 
-Next, we'll get some real-world data to analyze.  
-
+We'll use a real-world dataset from Airbnb so that the queries later on produce meaningful results.
 
 ## About the data
 
@@ -44,14 +45,16 @@ Next, we'll get some real-world data to analyze.
 
 ## Download data
 
-In the SSH terminal, start from `/home/hadoop` and create a download script:
+
+We'll create a shell script called *script.sh* to download, decompress, and preview both CSV files in one go.
 
 ```shell
 nano script.sh
 ```
 
 
-Copy and paste the code below into *script.sh*. It downloads and decompresses both files, renames them, and previews the header and first data row. 
+Copy and paste the code snippet below into the *script.sh* file.
+
 
 ```shell
 #!/bin/bash
@@ -77,7 +80,9 @@ ls -lh data
 ```
 
 
-Save the file (`Ctrl+O`, then `Enter`) and exit nano (`Ctrl+X`). Run the script:
+Save the change (`Ctrl+O`, then `Enter`) and exit nano (`Ctrl+X`). 
+
+Run the script once getting back to the shell :
 
 ```shell
 bash script.sh
@@ -93,28 +98,36 @@ sh script.sh
 
 # Use SQL-like queries with Hive
 
-With the CSV files downloaded, define Hive tables, load the data into HDFS, and run SQL queries.
+Now that the data is on the primary node, we need a way to query it. 
+
+Hive provides a SQL-like interface over HDFS, and Beeline is the command-line client we'll use to talk to HiveServer2.
+
 
 <br>
 
 ## Step 1: Open the Beeline CLI  
 
-Open Beeline and connect to HiveServer2 on the primary node as user `hadoop`:
+To launch Beeline with a custom configuration:
 
 ```shell
 beeline -u jdbc:hive2://localhost:10000 -n hadoop
 ```
 
+What the flags mean:
 
-Run the following SQL statements inside Beeline. Commands beginning with `!sh` run shell commands without leaving Beeline.
+- `-u jdbc:hive2://localhost:10000`: connects to HiveServer2 running on the local machine (the primary node) on its default port `10000`.
 
+-`-n hadoop`: authenticates as user `hadoop`, which is the default user on EMR and has permissions to create tables in HDFS.
 
+Once Beeline starts, you'll see a `0: jdbc:hive2://localhost:10000>` prompt. All the SQL below is typed there.
+
+ 
 
 <br>
 
 ## Step 2: Create external tables
 
-Before loading the data, define the columns and CSV format for each table. Creating a table defines its schema; it does not yet load the downloaded records.
+Now we tell Hive how to interpret the CSV files. We define a schema and point it at a location in HDFS. Note that it does not yet load the downloaded records.
 
 
 Check out [this page](https://github.com/justinjiajia/bigdata_lab_2026/blob/main/airbnb_metadata.md) to know the meaning of each field for records in the two data files.
@@ -148,12 +161,18 @@ The table definitions use:
 - `LOCATION`: specifies the HDFS directory for each table.
 - `skip.header.line.count`: skips the CSV header row.
 
-Check the HDFS directories associated with the tables:
+
+Let's confirm the tables were created and that their target directories exist in HDFS:
+
+
 
 
 ```shell
 !sh hadoop fs -ls /<your ITSC account>/airbnb
 ```
+
+> Tip: in Beeline, prefix a shell command with `!sh` to run it without leaving the client.
+
 
 You should see:
 
@@ -163,7 +182,7 @@ drwxr-xr-x   - hadoop hdfsadmingroup          0 202x-xx-xx 15:04 /<your ITSC acc
 drwxr-xr-x   - hadoop hdfsadmingroup          0 202x-xx-xx 14:56 /<your ITSC account>/airbnb/reviews
 ```
 
-This output confirms that the two table directories exist in HDFS.
+This output confirms that the directories that corresponds to the two tables have been created automatically.
 
 Also check that both tables are registered in Hive:
 
@@ -178,31 +197,37 @@ Note: External tables normally retain their data when dropped. Without `EXTERNAL
 
 ## Step 3: Load data onto HDFS
 
-Now load the downloaded CSV files into the table directories. `LOCAL` refers to the local filesystem; `OVERWRITE` replaces any existing data in the target table.
+The tables exist and know where to look, but the data is still sitting on the primary node's local disk. 
+
+This step copies it into HDFS so Hive can later read it in parallel across all the core nodes.
+
+
 
 ```sql
 LOAD DATA LOCAL INPATH '/home/hadoop/data/reviews.csv' OVERWRITE INTO TABLE reviews;
 LOAD DATA LOCAL INPATH '/home/hadoop/data/listings.csv' OVERWRITE INTO TABLE listings;
 ```
 
-Verify that the *listings* file has been loaded into HDFS:
+What the keywords mean:
+
+- Why `LOCAL`? Without `LOCAL`, Hive would look for the file in HDFS. With `LOCAL`, it looks on the local filesystem of the node where Beeline is running.   
+
+- `OVERWRITE` replaces any existing data in the target table.
+
+You can verify that the data files have been sucessfully loaded as follows:
+ 
   
 ```shell
 !sh hadoop fs -ls /<your ITSC account>/airbnb/listings
+!sh hadoop fs -ls /<your ITSC account>/airbnb/reviews
 ```
 
-You should see:
-
-```shell
-Found 1 items
--rw-r--r--   1 hadoop hdfsadmingroup   16566447 202x-xx-xx 16:49 /<your ITSC account>/airbnb/listings/listings.csv
-```
 
 
 ## Step 4: Explore table schema and data
 
-
-With the data loaded, inspect the table definitions and preview a few rows before running analytical queries.
+Before running any analysis, it's good practice to confirm the schema and eyeball a few rows.  If something is misaligned, you'll catch it here rather than after writing a complicated query.
+ 
 
 Show the column names and data types:
 
@@ -224,12 +249,16 @@ SELECT * FROM reviews LIMIT 5;
 SELECT id, name, neighbourhood, neighbourhood_cleansed FROM listings LIMIT 10;
 ```
 
+> ⚠️ If you see odd rows where most columns are `NULL` and text from descriptions appears in unexpected columns, that is a sign that embedded newlines were not stripped from the CSV before loading. The cleaned files from the lab's data source have already been preprocessed, so this shouldn't happen here.
 
 
 ## Step 5: Answer analytical queries
 
 
-Now use filtering, aggregation, and joins to explore hosts, neighborhoods, and reviews.
+With the data loaded and verified, we can now turn to the analytical questions. 
+
+Each question below uses a different SQL technique — aggregation, conditional counting, and joins — to showcase Hive's capabilities.
+ 
 
 
 ### Question 1: "Which 10 neighborhoods have the most unique Superhosts?"
