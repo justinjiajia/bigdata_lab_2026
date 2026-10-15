@@ -252,7 +252,7 @@ SELECT * FROM reviews LIMIT 5;
 SELECT id, name, neighbourhood, neighbourhood_cleansed FROM listings LIMIT 10;
 ```
 
-> ⚠️ If you see odd rows where most columns are `NULL` and text from descriptions appears in unexpected columns, that is a sign that embedded newlines were not stripped from the CSV before loading. The cleaned files from the lab's data source have already been preprocessed, so this shouldn't happen here.
+> ⚠️ If you see odd rows where most columns are `NULL` and text from `descriptions` (one of the columns) appears in unexpected columns, that is a sign that embedded newlines were not stripped from the CSV before loading. The cleaned files from the lab's data source have already been preprocessed, so this shouldn't happen here.
 
 
 ## Step 5: Answer analytical queries
