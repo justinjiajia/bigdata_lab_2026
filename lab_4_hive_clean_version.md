@@ -67,6 +67,8 @@ We'll use a real-world dataset from Airbnb so that the queries later on produce 
 
 [Inside Airbnb](https://insideairbnb.com/get-the-data/) provides publicly available datasets for exploring Airbnb listings and activity in cities around the world. In this lab, we will use the Hong Kong listings and reviews datasets dated September 20. The listings data describes properties and their hosts, while the reviews data contains guest reviews linked to individual listings. Together, these datasets allow us to analyze hosts, room types, neighborhoods, and review activity using Hive.
 
+Check out [this page](https://github.com/justinjiajia/bigdata_lab_2026/blob/main/airbnb_metadata.md) for the meaning of each field in these two files.
+
 ## Download data
 
 
