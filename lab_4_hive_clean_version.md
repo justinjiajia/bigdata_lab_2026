@@ -239,7 +239,7 @@ What the keywords mean:
 
 - Why `LOCAL`? Without `LOCAL`, Hive would look for the file in HDFS. With `LOCAL`, it looks on the local filesystem of the node where Beeline is running.   
 
-- `OVERWRITE` replaces any existing data in the target table. If you omit it, Hive will simply add the file alongside any existing ones, causing duplicates.
+- `OVERWRITE` replaces any existing data in the target table. If you omit it, Hive will simply add the file alongside any existing ones, perhaps causing duplicates.
 
 You can verify that the data files have been sucessfully loaded as follows:
  
@@ -253,7 +253,7 @@ You can verify that the data files have been sucessfully loaded as follows:
 
 ## Step 4: Explore table schema and data
 
-Before running any analysis, it's good practice to confirm the schema and eyeball a few rows.  If something is misaligned, you'll catch it here rather than after writing a complicated query.
+Before running any analysis, it's good practice to confirm the schema and eyeball a few rows. If something is misaligned, you'll catch it here rather than after writing a complicated query.
  
 
 Show the column names and data types:
