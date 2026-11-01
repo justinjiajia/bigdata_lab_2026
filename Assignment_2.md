@@ -1,7 +1,7 @@
 
 This assignment aims to give you hands-on practice with PySpark programming in EMR.
 
-Launch an EMR cluster as instructed by lab 6's manual. Choose to install both Hadoop and Spark on the cluster.
+Launch an EMR cluster as instructed by lab 5's manual. Choose to install both Hadoop and Spark on the cluster.
 
 Then connect to the master node, and run the following script to prepare the data.
 
