@@ -138,7 +138,7 @@ Now you are ready to submit the Spark program and run it on YARN:
 spark-submit --master yarn recommendation.py
 ```
 
-> Check out [this page](spark-submit_options.md) for more launch options 
+> See [this page](spark-submit_options.md) for additional launch options.
 
 
 
