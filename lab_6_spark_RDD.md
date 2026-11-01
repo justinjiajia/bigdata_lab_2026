@@ -109,10 +109,30 @@ pairs = transactions.map(lambda x: x.strip().split(" ")).flatMap(lambda x: combi
 pairs_count = pairs.map(lambda x: (x, 1)).reduceByKey(lambda x, y: x+y)
 combined_pairs = pairs_count.flatMap(lambda x: [(x[0][0], [(x[0][1], x[1])]), (x[0][1], [(x[0][0], x[1])])])
 rec_pairs_ordered = combined_pairs.reduceByKey(lambda x, y: sorted(x+y, key=lambda val: val[1], reverse=True)[:5])
-rec_pairs_ordered.saveAsTextFile("hdfs:///<Your ITSC Account>/output_1")
+
+# --- save to S3 instead of HDFS ---
+rec_pairs_ordered.saveAsTextFile("s3a://hkust-isom3370-<Your ITSC Account>/recommendation_output")
 ```
 
 ## Submit the job
+
+
+Before submitting the Spark job, create the S3 bucket that will store the processing results by using the `aws s3 mb` command:
+
+
+
+
+```shell
+aws s3 mb s3://hkust-isom3370-<Your ITSC Account>
+```
+
+Spark's `saveAsTextFile` operation does not create buckets automatically. 
+
+If the target bucket does not exist, the Spark job will fail. Therefore, make sure the bucket is created before you proceed.
+
+
+Now you are ready to submit the Spark program and run it on YARN:
+
 
 ```shell
 spark-submit --master yarn recommendation.py
@@ -122,12 +142,9 @@ spark-submit --master yarn recommendation.py
 
 
 
-## Print the output
+## Download the output
 
-```shell
-hadoop fs -cat /<Your ITSC Account>/output_1/part-* | grep "ELE96863"
-```
-
+Open the [Amazon S3 console](https://us-east-1.console.aws.amazon.com/s3/buckets?region=us-east-1) to browse and download the objects stored in the bucket.
 <br>
 
 # Reference
