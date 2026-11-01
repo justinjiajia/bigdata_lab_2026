@@ -26,7 +26,7 @@ Betweem the 2 datasets, the [*soc-LiveJournal1Adj.txt*](https://snap.stanford.ed
 
 Despite this directional nature, the co-occurrence-based recommendation approach still applies: if two users appear together in the declaration lists of many other users, they are likely to be friends and we should recommend them to declare each other as friends. **However, we must not recommend a user someone they have already declared as a friend** — such a recommendation would be redundant.
 
-**Implementation Note**:
+### Implementation Note:
  
 
 For a target user `U`, a candidate `V` must be filtered out if `U` has declared `V` as a friend — that is, if `V` appears in `U`'s own friend list. This check is one-directional: it considers only outgoing declarations from `U`.
@@ -86,7 +86,7 @@ Note:
 
 - For each target user `U`, a candidate `V` must be removed from `U`'s recommendation list if `U` has declared `V` (i.e., `V` is in `U`'s own friend list). The reverse direction alone does not trigger removal.
 
-**Output Specification**
+### Output Specification
 
 The output must contain one line per user in the following format:
 
@@ -111,13 +111,13 @@ Tuples must be sorted in descending order by `Shared_Friends_Count`; Only includ
  
 
 
-## Start the PySpark shell
+### Start the PySpark shell
 
 ```shell
 pyspark --master yarn
 ```
 
-## Show the output
+### Show the output
 
 If your output is saved in */output* on HDFS, you can use the command below to show the first 10 recommendation lists.
 
@@ -126,7 +126,7 @@ hadoop fs -cat /output/* | head -n10
 ```
 
 
-#### Your submission should include both the code and the screenshot of the output.
+### Your submission should include both the code and the screenshot of the output.
 
 ![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) IMPORTANT: After using EMR, remember to terminate your EMR cluster.
 
