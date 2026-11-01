@@ -151,4 +151,3 @@ Open the [Amazon S3 console](https://us-east-1.console.aws.amazon.com/s3/buckets
 
 https://spark.apache.org/docs/latest/submitting-applications
 
-https://github.com/justinjiajia/bigdata_lab/blob/main/spark-submit_options.md
