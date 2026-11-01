@@ -75,14 +75,16 @@ The record
 ```
 46134    46069,46079,46105
 ```
-means user 46134 has declared 3 friends. 
+means user `46134` has declared 3 friends. 
 
 
-Note: 
+Note:
 
-- User IDs in each list are not in sorted order. 
-- There're users who haven't declare any friends. They should be dropped from subsequent processing.
+- User IDs in each list are not in sorted order.
 
+- There are users who haven't declared any friends. They should be dropped from subsequent processing.
+
+- For each target user `U`, a candidate `V` must be removed from `U`'s recommendation list if `U` has declared `V` (i.e., `V` is in `U`'s own friend list). The reverse direction alone does not trigger removal.
 
 **Output Specification**
 
