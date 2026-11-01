@@ -53,9 +53,11 @@ bash script.sh
 ```shell
 pyspark --master yarn --deploy-mode client
 ```
-> Note: Spark shell can only be started in client mode.
+> Note: The Spark shell can only be started in client mode.
 
-## PySpark code to run sequentially
+## Run PySpark code sequentially
+ 
+Then run the following PySpark code sequentially:
 
 ```python
 transactions = sc.textFile("hdfs:///<Your ITSC Account>/input/transactions.txt")  # absolute path of the input file on HDFS
