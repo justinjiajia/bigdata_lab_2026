@@ -111,7 +111,7 @@ combined_pairs = pairs_count.flatMap(lambda x: [(x[0][0], [(x[0][1], x[1])]), (x
 rec_pairs_ordered = combined_pairs.reduceByKey(lambda x, y: sorted(x+y, key=lambda val: val[1], reverse=True)[:5])
 
 # --- save to S3 instead of HDFS ---
-rec_pairs_ordered.saveAsTextFile("s3a://hkust-isom3370-<Your ITSC Account>/recommendation_output")
+rec_pairs_ordered.saveAsTextFile("s3://hkust-isom3370-<Your ITSC Account>/recommendation_output")
 ```
 
 ## Submit the job
