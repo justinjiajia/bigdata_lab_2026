@@ -132,7 +132,7 @@ pyspark --master yarn
 If your output is saved in */output* on HDFS, you can use the command below to show the first 10 recommendation lists.
 
 ```shell
-hadoop fs -cat /output/* | head -n10
+hadoop fs -cat /output/* | head -n 10
 ```
 
 
