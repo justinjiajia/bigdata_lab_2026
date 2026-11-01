@@ -109,6 +109,10 @@ If, after filtering, a user has no candidates left, output the user with an empt
 
 **Note**: Make sure your code works on *tiny_social_data.txt* before you run it on the entire dataset.
 
+
+#### Hint
+
+The RDD API provides a transformation called `subtractByKey` that is well suited to removing already-declared relationships from your candidate list. If you're unsure how to use it for this purpose, read the documentation for [pyspark.RDD.subtractByKey](https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.RDD.subtractByKey.html) — pay attention to how keys are matched between the two RDDs and what happens to the values of keys that survive.
  
 
 
