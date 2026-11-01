@@ -1,11 +1,11 @@
 
-
-
 This assignment aims to give you hands-on practice with PySpark programming in EMR.
 
-Launch an EMR cluster as instructed by lab 6’s manual.  Choose to install both Hadoop and Spark on the cluster. 
+Launch an EMR cluster as instructed by lab 6's manual. Choose to install both Hadoop and Spark on the cluster.
 
-Then SSH into the master node, and run the following script to prepare the data.
+Then connect to the master node, and run the following script to prepare the data.
+
+
 
 ```shell
 #!/bin/bash
@@ -20,13 +20,18 @@ hadoop fs -df -h /input
 hadoop fs -ls /input
 ```
 
-Betweem the 2 datasets, the [*soc-LiveJournal1Adj.txt*](https://snap.stanford.edu/data/soc-LiveJournal1.html) dataset represents the social network structure of 50,000 LiveJournal users. Unlike mutual friendships in Assignment 1, LiveJournal allows one-way friendship declarations - user A can declare user B as a friend without requiring B to reciprocate.
+Betweem the 2 datasets, the [*soc-LiveJournal1Adj.txt*](https://snap.stanford.edu/data/soc-LiveJournal1.html) dataset represents the social network structure of 50,000 LiveJournal users. Unlike mutual friendships you've seen before in the friend recommendation example, LiveJournal allows one-way friendship declarations - user A can declare user B as a friend without requiring B to reciprocate.
 
-Despite this directional nature, our recommendation approach remains unaffected: If two users appear together in the declaration lists of many other users, they are likely to be friends and we should remcommend them to declare each other as friends.
+ 
+
+Despite this directional nature, the co-occurrence-based recommendation approach still applies: if two users appear together in the declaration lists of many other users, they are likely to be friends and we should recommend them to declare each other as friends. **However, we must not recommend a user someone they have already declared as a friend** — such a recommendation would be redundant.
 
 **Implementation Note**:
+ 
 
-For simplicity, you may still recommend these pairs even if one user has already declared the other as a friend (no need to filter out existing one-way connections).
+For a target user `U`, a candidate `V` must be filtered out if `U` has declared `V` as a friend — that is, if `V` appears in `U`'s own friend list. This check is one-directional: it considers only outgoing declarations from `U`.
+
+Consequently, a candidate `V` may still be recommended to `U` even if `V` has declared `U` as a friend but `U` has not declared `V` — this is precisely the one-way connection the recommendation aims to close. In other words, the filter removes only pairs already covered by `U`'s own declarations, not pairs covered solely by the other direction.
 
 [*tiny_social_data.txt*](https://github.com/justinjiajia/datafiles/blob/main/tiny_social_data.txt) stores a tiny portion of *soc-LiveJournal1Adj.txt*:
 
