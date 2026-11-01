@@ -94,17 +94,18 @@ The output must contain one line per user in the following format:
 (<User_ID>, [(Recommended_User1, Shared_Friends_Count1), (Recommended_User2, Shared_Friends_Count2), ...])
 ```
 
-So each line starts with a user ID, followed by exactly 5 recommendation tuples (or fewer if not enough candidates exist)
-
+Each line starts with a user ID, followed by **up to 5** recommendation tuples (fewer if fewer than 5 candidates remain **after filtering out users already declared by `U`**).
+ 
 Each tuple contains: 
 
 - `Recommended_User`: The suggested friend's ID;
   
 - `Shared_Friends_Count`: Number of users who declared both this user and the recommended user as friends;
 
+ 
+Tuples must be sorted in descending order by `Shared_Friends_Count`; only include the top 5 recommendations (or all available if fewer than 5 remain after filtering).
 
-Tuples must be sorted in descending order by `Shared_Friends_Count`; Only include the top 5 recommendations (or all available if <5 exist)
-
+If, after filtering, a user has no candidates left, output the user with an empty list: `(<User_ID>, [])`
 
 **Note**: Make sure your code works on *tiny_social_data.txt* before you run it on the entire dataset.
 
