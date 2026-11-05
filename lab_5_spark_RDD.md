@@ -2,7 +2,7 @@
 
 - EMR release: 7.14.0 
 
--  ![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) IMPORTANT: Application: Hadoop, Spark, and Hive
+-  ![#f03c15](https://placehold.co/15x15/f03c15/f03c15.png) IMPORTANT: Application: Hadoop and Spark
   
 - Primary instance: type: `m4.large`, quantity: 1
 
